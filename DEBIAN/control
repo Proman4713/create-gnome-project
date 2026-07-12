@@ -1,0 +1,8 @@
+Package: create-gnome-project
+Version: 1.0.0
+Architecture: all
+Section: utils
+Priority: optional
+Maintainer: Aaser Abd-el Sabour <proman4713@gmail.com>
+Description: Create basic GNOME shell extensions and GTK4/Libadwaita apps
+Depends: gcc
