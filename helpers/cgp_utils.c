@@ -99,17 +99,17 @@ int64_t StringArray_indexOf(char* array[], unsigned int length, char* item)
 //^ My own OOP coding style as a JS and C# dev sneaking in
 
 //* Dynamic integer arrays
-DynArrayInt new_DynArrayInt(int* array, unsigned int initialLength)
+DynIntArray new_DynIntArray(int* array, unsigned int initialLength)
 {
 	if (array == NULL || initialLength == 0)
 	{
-		DynArrayInt newArray;
+		DynIntArray newArray;
 		newArray.array = NULL;
 		newArray.length = 0;
 		return newArray;
 	}
 
-	DynArrayInt newArray;
+	DynIntArray newArray;
 	newArray.array = malloc(initialLength * sizeof(int));
 	if (newArray.array == NULL)
 	{
@@ -127,7 +127,7 @@ DynArrayInt new_DynArrayInt(int* array, unsigned int initialLength)
 }
 
 //* Push an element to a dynamic integer array
-unsigned int DynArrayInt_push(DynArrayInt* dynamicArray, int item)
+unsigned int DynIntArray_push(DynIntArray* dynamicArray, int item)
 {
 	if (dynamicArray->length + 1 > UINT_MAX)
 	{
@@ -135,7 +135,7 @@ unsigned int DynArrayInt_push(DynArrayInt* dynamicArray, int item)
 		exit(1);
 	}
 
-	DynArrayInt newArray;
+	DynIntArray newArray;
 	unsigned int newLength = dynamicArray->length + 1;
 
 	int *newPtr = realloc(dynamicArray->array, newLength * sizeof(int));
@@ -156,9 +156,9 @@ unsigned int DynArrayInt_push(DynArrayInt* dynamicArray, int item)
 }
 
 //* Pop the last element of a dynamic integer array
-unsigned int DynArrayInt_pop(DynArrayInt* dynamicArray)
+unsigned int DynIntArray_pop(DynIntArray* dynamicArray)
 {
-	DynArrayInt newArray;
+	DynIntArray newArray;
 	unsigned int newLength = dynamicArray->length - 1;
 
 	// This frees the last element, basically deleting it
@@ -174,6 +174,26 @@ unsigned int DynArrayInt_pop(DynArrayInt* dynamicArray)
 	*dynamicArray = newArray;
 
 	return newLength;
+}
+
+bool DynIntArray_includes(DynIntArray* dynamicArray, int item)
+{
+	for (int i = 0; i < dynamicArray->length; i++)
+	{
+		if (dynamicArray->array[i] == item)
+			return true;
+	}
+	return false;
+}
+
+int64_t DynIntArray_indexOf(DynIntArray* dynamicArray, int item)
+{
+	for (int i = 0; i < dynamicArray->length; i++)
+	{
+		if (dynamicArray->array[i] == item)
+			return i;
+	}
+	return -1;
 }
 
 //* Dynamic string arrays

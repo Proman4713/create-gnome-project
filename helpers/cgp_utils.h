@@ -16,18 +16,18 @@ bool StringArray_includes(char* array[], unsigned int length, char* item);
 int64_t IntArray_indexOf(int array[], unsigned int length, int item);
 int64_t StringArray_indexOf(char* array[], unsigned int length, char* item);
 
-typedef struct
-{
+typedef struct {
 	int* array;
 	unsigned int length;
-} DynArrayInt;
+} DynIntArray;
 
-DynArrayInt new_DynArrayInt(int* array, unsigned int initialLength);
-unsigned int DynArrayInt_push(DynArrayInt* dynamicArray, int item);
-unsigned int DynArrayInt_pop(DynArrayInt* dynamicArray);
+DynIntArray new_DynIntArray(int* array, unsigned int initialLength);
+unsigned int DynIntArray_push(DynIntArray* dynamicArray, int item);
+unsigned int DynIntArray_pop(DynIntArray* dynamicArray);
+bool DynIntArray_includes(DynIntArray* dynamicArray, int item);
+int64_t DynIntArray_indexOf(DynIntArray* dynamicArray, int item);
 
-typedef struct
-{
-	char **array;
+typedef struct {
+	char** array;
 	unsigned int length;
-} DynArrayString;
+} DynStringArray;

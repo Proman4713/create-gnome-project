@@ -1,10 +1,8 @@
 #include "cgp_errors.h"
 
-void cgp_throw(CGP_ERR error)
-{
+void cgp_throw(CGP_ERR error) {
 	printf("Error: ");
-	switch (error)
-	{
+	switch (error) {
 		case MEM_ERR:
 			printf("Memory error.");
 			break;
