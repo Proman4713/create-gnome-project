@@ -4,7 +4,15 @@
 // Short option, long option and description
 
 const char* CGP_OPTIONS[MAX_OPTIONS][3] = {
-	{"-h", "--help", "Show this help message and exit."}
+	{"-h", "--help", "Show this help message and exit."},
+	{"-n", "--name", "Project Name. Default: my-program"},
+	{"-i", "--id", "Application ID for GTK apps or extension ID for extensions. Default: com.example.MyProgram"},
+	{"-o", "--output-dir", "Output directory. Default: ./"},
+	{"-l", "--lang", "Programming Language. Available options: JavaScript, C. Default: JavaScript"},
+	{"-li", "--license", "Code License. Available options: GPLv3, MIT. Default: GPLv3"},
+	// Terminal styling courtesy of my own javascript library, https://github.com/Proman4713/javascript-console-styling
+	{"-g", "--git", "Initiate a git repository in \x1b[1m--output-dir\x1b[0m"},
+	{"-p", "--project", "\x1b[31m\x1b[1m[REQUIRED]\x1b[0m Type of project. Available options: GTK4, Libadwaita, Extension"},
 };
 
 void cgp_printHelp()
@@ -16,6 +24,8 @@ void cgp_printHelp()
 		"\n"\
 		"Options:\n"
 	);
+	const int TOTAL_SPACES = 32;
+
 	for (int i = 0; i < MAX_OPTIONS; i++)
 	{
 		const char** optionData = CGP_OPTIONS[i];
@@ -29,22 +39,41 @@ void cgp_printHelp()
 		// Initial indentation
 		printf("	");
 
+		int entryLength = 0;
+
 		// If there is a shortened option, print it
 		if (shortOpt[0] != '\0')
+		{
+			entryLength += strlen(shortOpt);
 			printf("%s", shortOpt);
+		}
 
 		// If there's a long option...
 		if (longOpt[0] != '\0')
 		{
+			entryLength += strlen(longOpt);
 			if (shortOpt[0] != '\0')
-				printf(", %s", longOpt); // ...add that as well
+			{
+				char* prefix = ", ";
+				entryLength += strlen(prefix);
+				printf("%s%s", prefix, longOpt); // ...add that as well
+			}
 			else
 				printf("%s", longOpt); // ...or print it alone if there was no short one
 		}
 		
 		// Description
 		if (desc[0] != '\0')
-			printf(":		%s", desc);
+		{
+			printf(":");
+			// account for the colon
+			entryLength++;
+			for (int i = 0; i < TOTAL_SPACES - entryLength; i++)
+			{
+				printf(" ");
+			}
+			printf("%s", desc);
+		}
 		
 		// Final newline
 		printf("\n");

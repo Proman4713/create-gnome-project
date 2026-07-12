@@ -37,14 +37,24 @@ int main(int argc, char* argv[]) {
 	for (int i = 1; i < argc; i++) {
 		bool found = false;
 		for (int j = 0; j < MAX_OPTIONS; j++) {
+			const char** optionData = CGP_OPTIONS[j];
+			if (optionData[0] == NULL)
+				break;
+
 			// If it's either a shortened or a long version of an option
-			if (CGP_OPTIONS[j][0] == argv[i] || CGP_OPTIONS[j][1] == argv[i])
+			if (strcmp(optionData[0], argv[i]) == 0 || strcmp(optionData[1], argv[i]) == 0)
 				found = true;
 		}
 		if (!found) {
 			printf("Error: Invalid argument %s\n", argv[i]);
 			exit(1);
 		}
+	}
+
+	if (!cgp_searchArgs(argc, argv, "-p") && !cgp_searchArgs(argc, argv, "--project"))
+	{
+		cgp_printHelp();
+		exit(1);
 	}
 
 	//^ Program
