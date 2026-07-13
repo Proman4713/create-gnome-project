@@ -1,9 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef enum
 {
 	MEM_ERR,
-	TOO_LARGE
+	TOO_LARGE,
+	INVALID_ARG,
+	IO
 } CGP_ERR;
 
-void cgp_throw(CGP_ERR error);
+void cgp_throw(const CGP_ERR error, const char* message);

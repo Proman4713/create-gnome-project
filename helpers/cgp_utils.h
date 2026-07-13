@@ -1,3 +1,6 @@
+// TODO: Find alternative
+#include <cs50.h>
+#include <ctype.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -5,27 +8,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-// 30 maximum options
-#define MAX_OPTIONS 30
-
-extern const char* CGP_OPTIONS[MAX_OPTIONS][3];
-
 void cgp_printHelp(void);
-bool IntArray_includes(int array[], unsigned int length, int item);
-bool StringArray_includes(char* array[], unsigned int length, char* item);
-int64_t IntArray_indexOf(int array[], unsigned int length, int item);
-int64_t StringArray_indexOf(char* array[], unsigned int length, char* item);
+char* get_string_withDefault(const char* prompt, const char* defaultValue);
+char* String_toLowercase(const char* string);
+bool IntArray_includes(const int array[], const unsigned int length, const int item);
+bool StringArray_includes(const char* array[], const unsigned int length, const char* item);
+int64_t IntArray_indexOf(const int array[], const unsigned int length, const int item);
+int64_t StringArray_indexOf(const char* array[], const unsigned int length, const char* item);
 
 typedef struct {
 	int* array;
 	unsigned int length;
 } DynIntArray;
 
-DynIntArray new_DynIntArray(int* array, unsigned int initialLength);
-unsigned int DynIntArray_push(DynIntArray* dynamicArray, int item);
+DynIntArray new_DynIntArray(const int* array, const unsigned int initialLength);
+unsigned int DynIntArray_push(DynIntArray* dynamicArray, const int item);
 unsigned int DynIntArray_pop(DynIntArray* dynamicArray);
-bool DynIntArray_includes(DynIntArray* dynamicArray, int item);
-int64_t DynIntArray_indexOf(DynIntArray* dynamicArray, int item);
+bool DynIntArray_includes(DynIntArray* dynamicArray, const int item);
+int64_t DynIntArray_indexOf(DynIntArray* dynamicArray, const int item);
 
 typedef struct {
 	char** array;

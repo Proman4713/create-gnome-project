@@ -1,19 +1,33 @@
 #include "cgp_errors.h"
 
-void cgp_throw(CGP_ERR error) {
-	printf("Error: ");
+void cgp_throw(const CGP_ERR error, const char* message) {
+	printf("\x1b[31m\x1b[1m[Error]\x1b[31m\x1b[0m ");
 	switch (error) {
 		case MEM_ERR:
-			printf("Memory error.");
+			printf("Memory error");
 			break;
 
 		case TOO_LARGE:
-			printf("Tried to use too much memory.");
+			printf("Tried to use too much memory");
+			break;
+
+		case INVALID_ARG:
+			printf("Invalid Argument");
+			break;
+
+		case IO:
+			printf("Input/Output");
 			break;
 
 		default:
-			printf("Uknown.");
+			printf("Uknown");
 			break;
 	}
+	if (strlen(message)) {
+		printf(": %s", message);
+	} else {
+		printf(".");
+	}
 	printf("\n");
+	exit(1);
 }
