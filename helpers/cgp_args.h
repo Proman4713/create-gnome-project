@@ -6,6 +6,7 @@
 
 extern const char* CGP_OPTIONS[MAX_OPTIONS][3];
 
+void cgp_printHelp();
 bool cgp_searchArgs(int argc, char* argv[], char* shortArg, char* longArg);
 char* cgp_getArgValue(int argc, char* argv[], char* shortArg, char* longArg);
 void cgp_validateArgs(int argc, char* argv[]);
