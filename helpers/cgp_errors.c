@@ -19,6 +19,10 @@ void cgp_throw(const CGP_ERR error, const char* message) {
 			printf("Input/Output");
 			break;
 
+		case PROGRAM_ERR:
+			printf("Program Error");
+			break;
+
 		default:
 			printf("Uknown");
 			break;

@@ -1,0 +1,25 @@
+/* {{FILENAME}}-application.c
+ *
+ * Place your license here
+ */
+
+#include "config.h"
+
+#include <glib-2.0/glib/gi18n.h>
+
+#include "{{FILENAME}}-application.h"
+
+int main(int argc,
+		 char* argv[]) {
+	g_autoptr({{PascalName}}Application) app = NULL;
+	int ret;
+
+	bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+	textdomain(GETTEXT_PACKAGE);
+
+	app = {{FILENAME}}_application_new("{{PROJECT_ID}}", G_APPLICATION_DEFAULT_FLAGS);
+	ret = g_application_run(G_APPLICATION(app), argc, argv);
+
+	return ret;
+}

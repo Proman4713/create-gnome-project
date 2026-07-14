@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="{{PROJECT_ID_PATH}}">
+    <file preprocess="xml-stripblanks">{{FILENAME}}-window.ui</file>
+    <file preprocess="xml-stripblanks">{{FILENAME}}-shortcuts.ui</file>
+  </gresource>
+</gresources>

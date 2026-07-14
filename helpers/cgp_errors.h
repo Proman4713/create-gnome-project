@@ -7,7 +7,8 @@ typedef enum
 	MEM_ERR,
 	TOO_LARGE,
 	INVALID_ARG,
-	IO
+	IO,
+	PROGRAM_ERR
 } CGP_ERR;
 
 void cgp_throw(const CGP_ERR error, const char* message);

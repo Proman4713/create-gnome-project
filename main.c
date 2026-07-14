@@ -200,22 +200,27 @@ int main(int argc, char* argv[]) {
 
 	printf("Working...\n");
 
-	//! GTK Project structure learned from https://developer.gnome.org/documentation/tutorials/beginners/getting_started.html
+	//! GTK Project structure learned from https://gitlab.gnome.org/GNOME/gnome-builder/-/blob/main/src/plugins/meson-templates/resources
+	//!	As well as Ptyxis' project structure (I chose Ptyxis for no specific reason)
 	if (!isExtension) {
-		printf("Creating GTK4 app...\n");
+		if (!strcmp(projectLang, "c")) {
+			printf("Creating GTK4 app...\n");
 
-		if (projectLang == "c") {
-			char* mesonBuildFilepath = malloc((strlen(outputDir) + strlen("meson.build") + strlen("/") + 1) * sizeof(char));
-			strcpy(mesonBuildFilepath, outputDir);
-			if (!String_endsWith(outputDir, "/")) strcat(mesonBuildFilepath, "/");
-			strcat(mesonBuildFilepath, "meson.build");
+			if (projectLang == "c") {
+				char* mesonBuildFilepath = malloc((strlen(outputDir) + strlen("meson.build") + strlen("/") + 1) * sizeof(char));
+				strcpy(mesonBuildFilepath, outputDir);
+				if (!String_endsWith(outputDir, "/")) strcat(mesonBuildFilepath, "/");
+				strcat(mesonBuildFilepath, "meson.build");
 
-			FILE* mesonBuildFilePtr = fopen(mesonBuildFilepath, "w");
-			free(mesonBuildFilepath);
-			mesonBuildFilepath = NULL;
-			printf("Downloading meson.build...\n");
+				FILE* mesonBuildFilePtr = fopen(mesonBuildFilepath, "w");
+				free(mesonBuildFilepath);
+				mesonBuildFilepath = NULL;
+				printf("Downloading meson.build...\n");
 
-			fclose(mesonBuildFilePtr);
+				fclose(mesonBuildFilePtr);
+			}
+		} else {
+			cgp_throw(PROGRAM_ERR, "The programming language you chose is not yet implemented.");
 		}
 	}
 
