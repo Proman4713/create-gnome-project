@@ -7,7 +7,7 @@
 #include "helpers/cgp_utils.h"
 #include "helpers/cgp_args.h"
 
-int main(const int argc, const char* argv[]) {
+int main(int argc, char* argv[]) {
 	if (argc < 2) {
 		cgp_printHelp();
 		exit(0);
@@ -35,6 +35,7 @@ int main(const int argc, const char* argv[]) {
 	char* license = NULL;
 	bool doGit = false;
 	bool isExtension = false;
+	bool isLibadwaita = false;
 
 	//* Reusable variables
 	char* tmp = NULL;
@@ -53,11 +54,12 @@ int main(const int argc, const char* argv[]) {
 		projectType = String_toLowercase(tmpPtr);
 
 		// If it's different from all possible values
-		if (!StringArray_includes((const char*[]){ "gtk", "libadwaita", "extension" }, 3, projectType))
+		if (!StringArray_includes((char*[]){ "gtk", "libadwaita", "extension" }, 3, projectType))
 			cgp_throw(INVALID_ARG, "Invalid Project Type.");
 
 		isExtension = !strcmp(projectType, "extension");
-		
+		isLibadwaita = !strcmp(projectType, "libadwaita");
+
 		free(tmpPtr); tmpPtr = NULL;
 
 	//? --name
@@ -142,7 +144,7 @@ int main(const int argc, const char* argv[]) {
 		projectLang = String_toLowercase(tmpPtr);
 
 		// If it's different from all possible values
-		if (!StringArray_includes((const char*[]){ "c", "javascript" }, 2, projectLang))
+		if (!StringArray_includes((char*[]){ "c", "javascript" }, 2, projectLang))
 			cgp_throw(INVALID_ARG, "Unsupported language.");
 
 		free(tmpPtr); tmpPtr = NULL;
@@ -165,7 +167,7 @@ int main(const int argc, const char* argv[]) {
 		editor = String_toLowercase(tmpPtr);
 
 		// If it's different from all possible values
-		if (!StringArray_includes((const char*[]){ "vscode", "rider", "none" }, 3, editor))
+		if (!StringArray_includes((char*[]){ "vscode", "rider", "none" }, 3, editor))
 			cgp_throw(INVALID_ARG, "Unsupported editor.");
 
 		free(tmpPtr); tmpPtr = NULL;
@@ -188,7 +190,7 @@ int main(const int argc, const char* argv[]) {
 		license = String_toLowercase(tmpPtr);
 
 		// If it's different from all possible values
-		if (!StringArray_includes((const char*[]){ "gplv3", "mit" }, 2, license))
+		if (!StringArray_includes((char*[]){ "gplv3", "mit" }, 2, license))
 			cgp_throw(INVALID_ARG, "Unsupported license.");
 
 		free(tmpPtr); tmpPtr = NULL;
@@ -197,6 +199,25 @@ int main(const int argc, const char* argv[]) {
 		doGit = cgp_searchArgs(argc, argv, "-g", "--git");
 
 	printf("Working...\n");
+
+	//! GTK Project structure learned from https://developer.gnome.org/documentation/tutorials/beginners/getting_started.html
+	if (!isExtension) {
+		printf("Creating GTK4 app...\n");
+
+		if (projectLang == "c") {
+			char* mesonBuildFilepath = malloc((strlen(outputDir) + strlen("meson.build") + strlen("/") + 1) * sizeof(char));
+			strcpy(mesonBuildFilepath, outputDir);
+			if (!String_endsWith(outputDir, "/")) strcat(mesonBuildFilepath, "/");
+			strcat(mesonBuildFilepath, "meson.build");
+
+			FILE* mesonBuildFilePtr = fopen(mesonBuildFilepath, "w");
+			free(mesonBuildFilepath);
+			mesonBuildFilepath = NULL;
+			printf("Downloading meson.build...\n");
+
+			fclose(mesonBuildFilePtr);
+		}
+	}
 
 	// Free memory
 	if (projectType != NULL) free(projectType);
@@ -207,5 +228,5 @@ int main(const int argc, const char* argv[]) {
 	if (editor != NULL) free(editor);
 	if (license != NULL) free(license);
 
-	exit(0);
+	return 0;
 }

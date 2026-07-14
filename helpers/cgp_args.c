@@ -8,6 +8,7 @@ const char* CGP_OPTIONS[MAX_OPTIONS][3] = {
 	{"-h", "--help", "Show this help message and exit."},
 	{"-p", "--project", "\x1b[31m\x1b[1m[REQUIRED]\x1b[0m Type of project. Available options: GTK, Libadwaita, Extension"},
 	{"-n", "--name", "Project Name. Default: my-program"},
+	{"-a", "--author", "Project Author. Default: John Doe"},
 	{"-i", "--id", "Application ID for GTK apps or extension ID for extensions. Default: com.example.MyProgram"},
 	{"-o", "--output-dir", "Output directory. Default: ./"},
 	{"-l", "--lang", "Programming Language. Available options: JavaScript, C. Default: JavaScript"},
@@ -73,15 +74,14 @@ void cgp_printHelp() {
 	}
 }
 
-bool cgp_searchArgs(const int argc, const char* argv[], const char* shortArg, const char* longArg) {
+bool cgp_searchArgs(int argc, char* argv[], char* shortArg, char* longArg) {
 	// If we have arguments, then search the arguments only without argv[0]
 	if (StringArray_includes(argv + 1, argc - 1, shortArg) || StringArray_includes(argv + 1, argc - 1, longArg))
 		return true;
 	return false;
 }
 
-// Do not free, it was not malloc'd
-char* cgp_getArgValue(const int argc, const char* argv[], const char* shortArg, const char* longArg) {
+char* cgp_getArgValue(int argc, char* argv[], char* shortArg, char* longArg) {
 	bool isShort = true;
 	if (!StringArray_includes(argv, argc, shortArg)) {
 		if (StringArray_includes(argv, argc, longArg))
@@ -98,7 +98,7 @@ char* cgp_getArgValue(const int argc, const char* argv[], const char* shortArg, 
 	return argv[keyIdx + 1];
 }
 
-void cgp_validateArgs(const int argc, const char* argv[]) {
+void cgp_validateArgs(int argc, char* argv[]) {
 	// Validate all arguments after argv[0], of course
 	for (int i = 1; i < argc; i++) {
 		bool found = false;

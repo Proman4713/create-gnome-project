@@ -5,4 +5,4 @@ Section: utils
 Priority: optional
 Maintainer: Aaser Abd-el Sabour <proman4713@gmail.com>
 Description: Create basic GNOME shell extensions and GTK4/Libadwaita apps
-Depends: gcc
+Depends: gcc libgtk-4-dev meson ninja-build

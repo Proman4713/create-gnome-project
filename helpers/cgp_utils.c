@@ -1,7 +1,7 @@
 #include "cgp_utils.h"
 #include "cgp_errors.h"
 
-char* get_string_withDefault(const char* prompt, const char* defaultValue) {
+char* get_string_withDefault(char* prompt, char* defaultValue) {
 	char* response = get_string("%s\x1b[90m(%s)\x1b[0m ", prompt, defaultValue);
 
 	if (strlen(response) < 1)
@@ -11,7 +11,7 @@ char* get_string_withDefault(const char* prompt, const char* defaultValue) {
 }
 
 // Requires freeing
-char* String_toLowercase(const char* string) {
+char* String_toLowercase(char* string) {
 	char* newString = malloc((strlen(string) + 1) * sizeof(char));
 	if (newString == NULL) {
 		cgp_throw(MEM_ERR, "");
@@ -28,8 +28,34 @@ char* String_toLowercase(const char* string) {
 	return newString;
 }
 
+bool String_startsWith(char* string, char* prefix) {
+	bool matches = true;
+	size_t prefixLen = strlen(prefix);
+	for (int i = 0; i < prefixLen; i++) {
+		if (string[i] != prefix[i]) {
+			matches = false;
+		}
+	}
+	return matches;
+}
+
+bool String_endsWith(char* string, char* suffix) {
+	bool matches = true;
+	size_t suffixLen = strlen(suffix);
+	size_t stringLen = strlen(string);
+	if (suffixLen > stringLen)
+		return false;
+
+	for (int i = strlen(string) - 1; i > (stringLen - suffixLen - 1); i--) {
+		if (string[i] != suffix[i - (stringLen - suffixLen)]) {
+			matches = false;
+		}
+	}
+	return matches;
+}
+
 // JavaScript `Array.prototype.includes()` equivalent
-bool IntArray_includes(const int array[], const unsigned int length, const int item) {
+bool IntArray_includes(int array[], unsigned int length, int item) {
 	for (int i = 0; i < length; i++) {
 		if (array[i] == item)
 			return true;
@@ -38,7 +64,7 @@ bool IntArray_includes(const int array[], const unsigned int length, const int i
 }
 
 // JavaScript `Array.prototype.includes()` equivalent
-bool StringArray_includes(const char* array[], const unsigned int length, const char* item) {
+bool StringArray_includes(char* array[], unsigned int length, char* item) {
 	for (int i = 0; i < length; i++) {
 		if (strcmp(array[i], item) == 0)
 			return true;
@@ -48,7 +74,7 @@ bool StringArray_includes(const char* array[], const unsigned int length, const 
 
 //* 64-bit integer to fit all `unsigned int` values plus negative values for the -1 and avoid overflows
 // JavaScript `Array.prototype.indexOf()` equivalent
-int64_t IntArray_indexOf(const int array[], const unsigned int length, const int item) {
+int64_t IntArray_indexOf(int array[], unsigned int length, int item) {
 	for (int i = 0; i < length; i++) {
 		if (array[i] == item)
 			return i;
@@ -57,7 +83,7 @@ int64_t IntArray_indexOf(const int array[], const unsigned int length, const int
 }
 
 // JavaScript `Array.prototype.indexOf()` equivalent
-int64_t StringArray_indexOf(const char* array[], const unsigned int length, const char* item) {
+int64_t StringArray_indexOf(char* array[], unsigned int length, char* item) {
 	for (int i = 0; i < length; i++) {
 		if (strcmp(array[i], item) == 0)
 			return i;
@@ -68,7 +94,7 @@ int64_t StringArray_indexOf(const char* array[], const unsigned int length, cons
 //^ My own OOP coding style as a JS and C# dev sneaking in
 
 //* Dynamic integer arrays
-DynIntArray new_DynIntArray(const int* array, const unsigned int initialLength) {
+DynIntArray new_DynIntArray(int* array, unsigned int initialLength) {
 	if (array == NULL || initialLength == 0) {
 		DynIntArray newArray;
 		newArray.array = NULL;
@@ -91,7 +117,7 @@ DynIntArray new_DynIntArray(const int* array, const unsigned int initialLength) 
 }
 
 //* Push an element to a dynamic integer array
-unsigned int DynIntArray_push(DynIntArray* dynamicArray, const int item) {
+unsigned int DynIntArray_push(DynIntArray* dynamicArray, int item) {
 	if (dynamicArray->length + 1 > UINT_MAX)
 		cgp_throw(TOO_LARGE, "");
 
@@ -129,7 +155,7 @@ unsigned int DynIntArray_pop(DynIntArray* dynamicArray) {
 	return newLength;
 }
 
-bool DynIntArray_includes(DynIntArray* dynamicArray, const int item) {
+bool DynIntArray_includes(DynIntArray* dynamicArray, int item) {
 	for (int i = 0; i < dynamicArray->length; i++) {
 		if (dynamicArray->array[i] == item)
 			return true;
@@ -137,7 +163,7 @@ bool DynIntArray_includes(DynIntArray* dynamicArray, const int item) {
 	return false;
 }
 
-int64_t DynIntArray_indexOf(DynIntArray* dynamicArray, const int item) {
+int64_t DynIntArray_indexOf(DynIntArray* dynamicArray, int item) {
 	for (int i = 0; i < dynamicArray->length; i++) {
 		if (dynamicArray->array[i] == item)
 			return i;
