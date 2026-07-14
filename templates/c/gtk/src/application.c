@@ -3,14 +3,13 @@
  * Place your license here
  */
 
-#include "config.h"
 #include <glib-2.0/glib/gi18n.h>
 
 #include "{{FILENAME}}-application.h"
 #include "{{FILENAME}}-window.h"
 
 struct _{{PascalName}}Application {
-	{{APP_TYPE}}Application parent_instance;
+	GtkApplication parent_instance;
 };
 
 G_DEFINE_FINAL_TYPE({{PascalName}}Application, {{FILENAME}}_application, GTK_TYPE_APPLICATION)
