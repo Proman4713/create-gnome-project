@@ -30,7 +30,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "file://{{OUTPUT_DIR}}"
+                    "url" : "file://."
                 }
             ]
         }
