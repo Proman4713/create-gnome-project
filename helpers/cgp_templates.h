@@ -10,6 +10,7 @@ void downloadFileAndReplace(
 	char* PROJECT_NAME,
 	char* PROJECT_ID,
 	char* AUTHOR,
+	char* PROJECT_LICENSE,
 	bool appendProjectFilename,
 	bool appendProjectId
 );
@@ -17,3 +18,5 @@ void downloadFileAndReplace(
 char* projectFilenameToFile(char* filename, char* PROJECT_FILENAME);
 
 char* projectIdToFile(char* filename, char* PROJECT_ID);
+
+void finishAndGreet(bool isExtension, bool isLibadwaita, char* outputDir);

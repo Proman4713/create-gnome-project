@@ -10,3 +10,15 @@ void cgp_printHelp();
 bool cgp_searchArgs(int argc, char* argv[], char* shortArg, char* longArg);
 char* cgp_getArgValue(int argc, char* argv[], char* shortArg, char* longArg);
 void cgp_validateArgs(int argc, char* argv[]);
+char* cgp_getOrPromptArg(
+	int argc,
+	char* argv[],
+	char* shortArg,
+	char* longArg,
+	char* argName,
+	bool lower,
+	bool required,
+	char* prompt,
+	char* defaultValue,
+	char* allowedOptions[],
+	unsigned int allowedOptionCount);

@@ -9,6 +9,7 @@ void downloadFileAndReplace(
 	char* PROJECT_NAME,
 	char* PROJECT_ID,
 	char* AUTHOR,
+	char* PROJECT_LICENSE,
 	bool appendProjectFilename,
 	bool appendProjectId
 ) {
@@ -36,7 +37,10 @@ void downloadFileAndReplace(
 		URL);
 
 	if (downloadRes != CURLE_OK) {
-		cgp_throw(PROGRAM_ERR, "Couldn't download meson.build");
+		char* err_tmp = malloc(( strlen("Couldn't download ") + strlen(filename) + strlen(".") + 1 ) * sizeof(char));
+		strcpy(err_tmp, "Couldn't download "); strcat(err_tmp, filename); strcat(err_tmp, ".");
+		cgp_throw(PROGRAM_ERR, err_tmp);
+		free(err_tmp); err_tmp = NULL;
 	}
 
 	fclose(tempBinPtr);
@@ -58,13 +62,18 @@ void downloadFileAndReplace(
 	char* YEAR = Int_toString(localtime(&curTime)->tm_year + 1900);
 
 	char* PascalName = String_toPascalcase(PROJECT_NAME);
+
+	char* proj_id_path_tmp = String_replaceAll(PROJECT_ID, ".", "/");
+	char* PROJECT_ID_PATH = malloc(( strlen("/") + strlen(proj_id_path_tmp) + 1 ) * sizeof(char));
+	strcpy(PROJECT_ID_PATH, "/"); strcat(PROJECT_ID_PATH, proj_id_path_tmp);
+	free(proj_id_path_tmp); proj_id_path_tmp = NULL;
 	
 	while (fgets(lineBuffer, sizeof(lineBuffer), tempReadPtr) != NULL) {
 		char* filteredLine = String_replaceAllMulti(
 			lineBuffer,
-			(char*[]){	"{{FILENAME}}",	"{{PROJECT_NAME}}", "{{NAME_CAPS}}",	"{{PROJECT_ID}}", "{{PascalName}}", "{{AUTHOR}}", "{{YEAR}}" },
-			(char*[]){	FILENAME,		PROJECT_NAME,		NAME_CAPS,			PROJECT_ID,		  PascalName,		AUTHOR,		  YEAR },
-			7);
+			(char*[]){	"{{FILENAME}}",	"{{PROJECT_NAME}}", "{{NAME_CAPS}}",	"{{PROJECT_ID}}", "{{PascalName}}", "{{AUTHOR}}", "{{YEAR}}",	"{{PROJECT_ID_PATH}}",	"{{PROJECT_LICENSE}}" },
+			(char*[]){	FILENAME,		PROJECT_NAME,		NAME_CAPS,			PROJECT_ID,		  PascalName,		AUTHOR,		  YEAR,			PROJECT_ID_PATH,		PROJECT_LICENSE },
+			9);
 		fputs(filteredLine, writePtr);
 		free(filteredLine);
 	}
@@ -74,6 +83,7 @@ void downloadFileAndReplace(
 	fclose(writePtr); writePtr = NULL;
 
 	if (appendProjectFilename || appendProjectId) { free(localFilename); localFilename == NULL; }
+	free(PROJECT_ID_PATH); PROJECT_ID_PATH = NULL;
 	free(tempFilepath); tempFilepath = NULL;
 	free(NAME_CAPS); NAME_CAPS = NULL;
 	free(YEAR); YEAR = NULL;
@@ -95,4 +105,21 @@ char* projectIdToFile(char* filename, char* PROJECT_ID) {
 	strcpy(name_tmp, PROJECT_ID); strcat(name_tmp, "."); strcat(name_tmp, filename);
 
 	return name_tmp;
+}
+
+void finishAndGreet(bool isExtension, bool isLibadwaita, char* outputDir) {
+	if (!isExtension) {
+		printf("Running meson...\n\n");
+		chdir(outputDir);
+		system("meson setup builddir");
+		if (isLibadwaita) {
+			printf("\x1b[32mGood luck on your GTK4/Libadwaita app :D\x1b[0m\n");
+			return;
+		}
+
+		printf("\x1b[32mGood luck on your GTK4 app :D\x1b[0m\n");
+		return;
+	}
+
+	printf("\x1b[32mGood luck on your GNOME extension :D\x1b[0m\n");
 }

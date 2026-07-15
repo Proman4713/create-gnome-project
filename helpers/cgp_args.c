@@ -117,3 +117,59 @@ void cgp_validateArgs(int argc, char* argv[]) {
 			cgp_throw(INVALID_ARG, argv[i]);
 	}
 }
+
+// Requires freeing
+char* cgp_getOrPromptArg(
+	int argc,
+	char* argv[],
+	char* shortArg,
+	char* longArg,
+	char* argName,
+	bool lower,
+	bool required,
+	char* prompt,
+	char* defaultValue,
+	char* allowedOptions[],
+	unsigned int allowedOptionCount
+) {
+	char* value_tmp = NULL;
+	unsigned int tmpLen = 0;
+
+	value_tmp = cgp_getArgValue(argc, argv, shortArg, longArg);
+	tmpLen = strlen(value_tmp);
+	if (tmpLen < 1) {
+		if (required) {
+			char* err_tmp = malloc(( strlen(argName) + strlen(" required.") + 1 ) * sizeof(char));
+			if (err_tmp == NULL) cgp_throw(MEM_ERR, "");
+			strcpy(err_tmp, argName); strcat(err_tmp, " required.");
+			cgp_throw(INVALID_ARG, err_tmp);
+			// No need to free err_tmp, already thrown and exited
+		} else {
+			value_tmp = get_string_withDefault(
+				prompt, defaultValue
+			);
+			tmpLen = strlen(value_tmp);
+		}
+	}
+
+	char* lower_tmp = String_toLowercase(value_tmp);
+	if (lower_tmp == NULL) cgp_throw(MEM_ERR, "");
+	if (allowedOptions != NULL && allowedOptionCount > 0 && !StringArray_includes(allowedOptions, allowedOptionCount, lower_tmp)) {
+		char* err_tmp = malloc(( strlen("Invalid ") + strlen(argName) + strlen(".") + 1 ) * sizeof(char));
+		if (err_tmp == NULL) cgp_throw(MEM_ERR, "");
+		strcpy(err_tmp, "Invalid "); strcat(err_tmp, argName); strcat(err_tmp, ".");
+		cgp_throw(INVALID_ARG, err_tmp);
+	}
+
+	char* argValue = malloc((tmpLen + 1) * sizeof(char));
+	if (argValue == NULL) cgp_throw(MEM_ERR, "");
+
+	if (lower) {
+		strcpy(argValue, lower_tmp);
+	} else {
+		strcpy(argValue, value_tmp);
+	}
+	free(lower_tmp); lower_tmp = NULL;
+
+	return argValue;
+}

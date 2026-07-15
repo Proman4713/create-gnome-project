@@ -37,6 +37,56 @@ CURLcode downloadFile(FILE* file, char* URI) {
 	return res;
 }
 
+void mkdir_p(const char* path) {
+	struct stat statBuffer;
+	// If it exists
+	if (stat(path, &statBuffer) == 0) {
+		// If it's not a dir
+		if (!S_ISDIR(statBuffer.st_mode)) {
+			char* err_tmp = malloc(( strlen(path) + strlen(" must be a directory.") + 1 ) * sizeof(char));
+			if (err_tmp == NULL) cgp_throw(MEM_ERR, "");
+			strcpy(err_tmp, path); strcat(err_tmp, " must be a directory.");
+			cgp_throw(INVALID_ARG, err_tmp);
+		}
+	} else {
+		char* curDir = getcwd(NULL, 0);
+
+		DynStringArray segments = String_split(path, "/");
+		for (unsigned int i = 0; i < segments.length; i++) {
+			char* dir = segments.array[i];
+			
+			if (!strcmp(dir, ".")) continue;
+
+			//! Create it and check for errors, this WON'T WORK ON WINDOWS
+			if (mkdir(dir, 0777) != 0) {
+				// If the problem is that it exists as a directory, continue;
+				if (errno == EEXIST) {
+					struct stat tempStatBuf;
+					if (stat(dir, &tempStatBuf) == 0) {
+						if (S_ISDIR(tempStatBuf.st_mode)) {
+							chdir(dir);
+							continue;
+						} else {
+							char* err_tmp = malloc(( strlen(dir) + strlen(" exists but is not a directory.") + 1 ) * sizeof(char));
+							strcpy(err_tmp, dir); strcat(err_tmp, " exists but is not a directory.");
+							cgp_throw(IO, err_tmp);
+						}
+					}
+				}
+
+				char* err_tmp = malloc(( strlen("Couldn't create directory ") + strlen(dir) + 1 ) * sizeof(char));
+				strcpy(err_tmp, "Couldn't create directory "); strcat(err_tmp, dir);
+				cgp_throw(IO, err_tmp);
+			}
+
+			chdir(dir);
+		}
+		chdir(curDir);
+		free(curDir);
+		DynStringArray_free(&segments);
+	}
+}
+
 char* path_join(char* paths[], size_t length) {
 	if (length > UINT_MAX)
 		cgp_throw(TOO_LARGE, "");
@@ -59,10 +109,7 @@ char* path_join(char* paths[], size_t length) {
 		}
 
 		char* tmp = realloc(outputPath, pathSize * sizeof(char));
-		if (tmp == NULL) {
-			free(outputPath);
-			cgp_throw(MEM_ERR, "");
-		}
+		if (tmp == NULL) cgp_throw(MEM_ERR, "");
 		outputPath = tmp;
 		
 		strcat(outputPath, paths[i]);
@@ -235,6 +282,64 @@ char* String_replaceAll(char* string, char* pattern, char* replacement) {
 	return newString;
 }
 
+DynStringArray String_split(const char* string, char* pattern) {
+	DynStringArray dynamicArray = new_DynStringArray(NULL, 0);
+
+	// Grab the lengths
+	size_t patternLen = strlen(pattern);
+	size_t stringLen = strlen(string);
+
+	unsigned int lastIdx = 0;
+
+	// Loop through the entire string length
+	for (unsigned int i = 0; i <= stringLen; i++) {
+		// Start a search buffer
+		char* patternCandidate = malloc(( patternLen + 1 ) * sizeof(char));
+		for (unsigned int j = i; j < (i + patternLen); j++) {
+			// Out of bounds of original string, break.
+			if (j > (stringLen - 1)) {
+				patternCandidate[j - i] = '\0';
+				break;
+			}
+			patternCandidate[j - i] = string[j];
+		}
+		patternCandidate[patternLen] = '\0';
+
+		//* If the pattern buffer matches the pattern. If we didn't find anything but we are at the end, we'll still do it.
+		if (!strcmp(patternCandidate, pattern) || i == stringLen) {
+			// The past segment
+			char* past_segment = malloc(((i - lastIdx) + 1) * sizeof(char));
+			if (past_segment == NULL) cgp_throw(MEM_ERR, "");
+			past_segment[0] = '\0'; // Empty string
+			// If lastIdx is equal to i, then we found another pattern right away, so keep the segment an empty string
+			if (lastIdx != i) {
+				for (unsigned int j = lastIdx; j < i; j++) {
+					/*
+						In the case of i being stringLen, we don't need to add a branch for string[j] being \0 because
+						we're looping through j < i.
+					*/
+					charcat(past_segment, string[j]);
+				}
+			}
+			// Add to our array
+			DynStringArray_push(&dynamicArray, past_segment);
+			
+			// Skip the current pattern length for lastIdx so the next time the pattern matches, it will start from the next point after 
+			lastIdx = i + patternLen;
+			// Skip by patternLen - 1 because the loop itself contains i++
+			i += (patternLen - 1);
+
+			// Free the buffer and past segment
+			free(past_segment); past_segment = NULL;
+			free(patternCandidate); patternCandidate = NULL;
+			continue;
+		}
+		free(patternCandidate); patternCandidate = NULL;
+	}
+
+	return dynamicArray;
+}
+
 char* String_replaceAllMulti(char* string, char* patterns[], char* replacements[], size_t filterCount) {
 	char* result = NULL;
 
@@ -306,7 +411,7 @@ int64_t StringArray_indexOf(char* array[], unsigned int length, char* item) {
 //^ My own OOP coding style as a JS and C# dev sneaking in
 
 //* Dynamic integer arrays
-DynIntArray new_DynIntArray(int* array, unsigned int initialLength) {
+DynIntArray new_DynIntArray(int array[], unsigned int initialLength) {
 	if (array == NULL || initialLength == 0) {
 		DynIntArray newArray;
 		newArray.array = NULL;
@@ -360,7 +465,6 @@ unsigned int DynIntArray_push(DynIntArray* dynamicArray, int item) {
 
 	newArray.array = newPtr;
 	newArray.length = newLength;
-	free(dynamicArray->array);
 	*dynamicArray = newArray;
 
 	return newLength;
@@ -411,5 +515,135 @@ int64_t DynIntArray_indexOf(DynIntArray* dynamicArray, int item) {
 	return -1;
 }
 
+void DynIntArray_free(DynIntArray* dynamicArray) {
+	if (dynamicArray->array != NULL) {
+		free(dynamicArray->array);
+		dynamicArray->array = NULL;
+	}
+	dynamicArray->length = 0;
+}
+
 //* Dynamic string arrays
-// TODO: String dynamic arrays
+DynStringArray new_DynStringArray(char* array[], unsigned int initialLength) {
+	if (array == NULL || initialLength == 0) {
+		DynStringArray newArray;
+		newArray.array = NULL;
+		newArray.length = 0;
+		return newArray;
+	}
+
+	DynStringArray newArray;
+	newArray.array = malloc(initialLength * sizeof(char*));
+	if (newArray.array == NULL)
+		cgp_throw(MEM_ERR, "");
+
+	newArray.length = initialLength;
+
+	for (int i = 0; i < initialLength; i++) {
+		newArray.array[i] = array[i];
+	}
+
+	return newArray;
+}
+
+//* Push an element to a dynamic string array
+unsigned int DynStringArray_push(DynStringArray* dynamicArray, char* item) {
+	char* newItem = malloc((strlen(item) + 1) * sizeof(char));
+	if (newItem == NULL) cgp_throw(MEM_ERR, "");
+	strcpy(newItem, item);
+
+	if (dynamicArray->array == NULL) {
+		DynStringArray newArray;
+		unsigned int newLength = 1;
+
+		newArray.array = malloc(1 * sizeof(char*));
+		if (newArray.array == NULL) {
+			cgp_throw(MEM_ERR, "");
+		}
+		newArray.length = newLength;
+		newArray.array[0] = newItem;
+
+		*dynamicArray = newArray;
+		return newLength;
+	}
+
+	if (dynamicArray->length + 1 > UINT_MAX)
+		cgp_throw(TOO_LARGE, "");
+
+	DynStringArray newArray;
+	unsigned int newLength = dynamicArray->length + 1;
+
+	char** newPtr = realloc(dynamicArray->array, newLength * sizeof(char*));
+	if (newPtr == NULL)
+		cgp_throw(MEM_ERR, "");
+
+	// Set last element to new item
+	newPtr[dynamicArray->length] = newItem;
+
+	newArray.array = newPtr;
+	newArray.length = newLength;
+	*dynamicArray = newArray;
+
+	return newLength;
+}
+
+//* Pop the last element of a dynamic string array
+unsigned int DynStringArray_pop(DynStringArray* dynamicArray) {
+	if (dynamicArray->array == NULL) {
+		if (dynamicArray->length != 0)
+			dynamicArray->length = 0;
+		return 0;
+	}
+
+	DynStringArray newArray;
+	unsigned int newLength = dynamicArray->length - 1;
+
+	// Unlike integer arrays, the last element is a malloced string, we must free it
+	if (dynamicArray->array[newLength] != NULL) {
+		free(dynamicArray->array[newLength]); dynamicArray->array[newLength] = NULL;
+	}
+	char** newPtr = realloc(dynamicArray->array, newLength * sizeof(char*));
+	if (newPtr == NULL)
+		cgp_throw(MEM_ERR, "");
+
+	newArray.array = newPtr;
+	newArray.length = newLength;
+	*dynamicArray = newArray;
+
+	return newLength;
+}
+
+bool DynStringArray_includes(DynStringArray* dynamicArray, char* item) {
+	if (dynamicArray->array == NULL)
+		return false;
+
+	for (int i = 0; i < dynamicArray->length; i++) {
+		if (!strcmp(dynamicArray->array[i], item))
+			return true;
+	}
+	return false;
+}
+
+int64_t DynStringArray_indexOf(DynStringArray* dynamicArray, char* item) {
+	if (dynamicArray->array == NULL)
+		return -1;
+
+	for (int i = 0; i < dynamicArray->length; i++) {
+		if (!strcmp(dynamicArray->array[i], item))
+			return i;
+	}
+	return -1;
+}
+
+void DynStringArray_free(DynStringArray* dynamicArray) {
+	if (dynamicArray->array != NULL) {
+		for (unsigned int i = 0; i < dynamicArray->length; i++) {
+			if (dynamicArray->array[i] != NULL) {
+				free(dynamicArray->array[i]);
+			}
+		}
+		free(dynamicArray->array);
+		dynamicArray->array = NULL;
+	}
+	dynamicArray->length = 0;
+}

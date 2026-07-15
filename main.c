@@ -44,172 +44,91 @@ int main(int argc, char* argv[]) {
 	unsigned int tmpLen = 0;
 	char* tmpPtr = NULL;
 
-	//? --project
-		tmp = cgp_getArgValue(argc, argv, "-p", "--project");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) cgp_throw(INVALID_ARG, "Project Type required.");
-		// 								NUL
-		tmpPtr = malloc((tmpLen + 1) * sizeof(char));
-		if (tmpPtr == NULL)
-			cgp_throw(MEM_ERR, "");
-		strcpy(tmpPtr, tmp);
-		projectType = String_toLowercase(tmpPtr);
+	projectType = cgp_getOrPromptArg(
+		argc, argv,
+		"-p", "--project", "Project Type",
+		true, true,
+		NULL, NULL,
+		(char*[]){ "gtk", "libadwaita", "extension" }, 3
+	);
 
-		// If it's different from all possible values
-		if (!StringArray_includes((char*[]){ "gtk", "libadwaita", "extension" }, 3, projectType))
-			cgp_throw(INVALID_ARG, "Invalid Project Type.");
+	isExtension = !strcmp(projectType, "extension");
+	isLibadwaita = !strcmp(projectType, "libadwaita");
 
-		isExtension = !strcmp(projectType, "extension");
-		isLibadwaita = !strcmp(projectType, "libadwaita");
 
-		free(tmpPtr); tmpPtr = NULL;
+	projectName = cgp_getOrPromptArg(
+		argc, argv,
+		"-n", "--name", "Project Name",
+		false, false,
+		isExtension ? "Extension Name: " : "App Name: ", isExtension ? "My Extension" : "My Program",
+		NULL, 0
+	);
 
-	//? --name
-		tmp = cgp_getArgValue(argc, argv, "-n", "--name");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) {
-			tmp = get_string_withDefault(
-				isExtension ? "Extension Name: " : "App Name: ",
-				isExtension ? "My Extension" : "My Program"
-			);
-			tmpLen = strlen(tmp);
-		}
-		projectName = malloc((tmpLen + 1) * sizeof(char));
-		strcpy(projectName, tmp);
+	authorName = cgp_getOrPromptArg(
+		argc, argv,
+		"-a", "--author", "Author Name",
+		false, false,
+		"Author Name: ", "John Doe",
+		NULL, 0
+	);
 
-	//? --author
-		tmp = cgp_getArgValue(argc, argv, "-a", "--author");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) {
-			tmp = get_string_withDefault("Author Name: ", "John Doe");
-			tmpLen = strlen(tmp);
-		}
-		authorName = malloc((tmpLen + 1) * sizeof(char));
-		strcpy(authorName, tmp);
+	projectId = cgp_getOrPromptArg(
+		argc, argv,
+		"-i", "--id", "Project ID",
+		false, false,
+		isExtension ? "Extension ID: " : "App ID: ", isExtension ? "com.example.my_extension" : "com.example.MyProgram",
+		NULL, 0
+	);
 
-	//? --id
-		tmp = cgp_getArgValue(argc, argv, "-i", "--id");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) {
-			tmp = get_string_withDefault(
-				isExtension ? "Extension ID: " : "App ID: ",
-				isExtension ? "com.example.my_extension" : "com.example.MyProgram"
-			);
-			tmpLen = strlen(tmp);
-		}
-		projectId = malloc((tmpLen + 1) * sizeof(char));
-		strcpy(projectId, tmp);
+	outputDir = cgp_getOrPromptArg(
+		argc, argv,
+		"-o", "--output-dir", "Output Directory",
+		false, false,
+		"Output Directory: ", "./",
+		NULL, 0
+	);
 
-	//? --output-dir
-		tmp = cgp_getArgValue(argc, argv, "-o", "--output-dir");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) tmp = get_string_withDefault("Output Directory: ", "./"), tmpLen = strlen(tmp);
-		// 								NUL
-		tmpPtr = malloc((tmpLen + 1) * sizeof(char));
-		if (tmpPtr == NULL)
-			cgp_throw(MEM_ERR, "");
-		strcpy(tmpPtr, tmp);
-		outputDir = String_toLowercase(tmpPtr);
+	projectLang = cgp_getOrPromptArg(
+		argc, argv,
+		"-l", "--lang", "Project Language",
+		true, false,
+		"Language: ", "JavaScript",
+		(char*[]){ "c", "javascript" }, 2
+	);
 
-		struct stat statBuffer;
-		// If it exists
-		if (stat(outputDir, &statBuffer) == 0) {
-			// If it's not a dir
-			if (!S_ISDIR(statBuffer.st_mode)) {
-				cgp_throw(INVALID_ARG, "--output-dir must be a directory.");
-			}
-		} else {
-			//! Create it, this WON'T WORK ON WINDOWS
-			if (mkdir(outputDir, 0777) != 0) {
-				cgp_throw(IO, "Couldn't create output directory.");
-			}
-		}
-		free(tmpPtr); tmpPtr = NULL;
+	editor = cgp_getOrPromptArg(
+		argc, argv,
+		"-e", "--editor", "Editor",
+		true, false,
+		"Editor/IDE: ", "None",
+		(char*[]){ "vscode", "rider", "none" }, 3
+	);
 
-	//? --lang
-		tmp = cgp_getArgValue(argc, argv, "-l", "--lang");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) {
-			tmp = get_string_withDefault(
-				"Language: ",
-				"JavaScript"
-			);
-			tmpLen = strlen(tmp);
-		}
-		// 								NUL
-		tmpPtr = malloc((tmpLen + 1) * sizeof(char));
-		if (tmpPtr == NULL)
-			cgp_throw(MEM_ERR, "");
-		strcpy(tmpPtr, tmp);
-		projectLang = String_toLowercase(tmpPtr);
-
-		// If it's different from all possible values
-		if (!StringArray_includes((char*[]){ "c", "javascript" }, 2, projectLang))
-			cgp_throw(INVALID_ARG, "Unsupported language.");
-
-		free(tmpPtr); tmpPtr = NULL;
-
-	//? --editor
-		tmp = cgp_getArgValue(argc, argv, "-e", "--editor");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) {
-			tmp = get_string_withDefault(
-				"Editor/IDE: ",
-				"None"
-			);
-			tmpLen = strlen(tmp);
-		}
-		// 								NUL
-		tmpPtr = malloc((tmpLen + 1) * sizeof(char));
-		if (tmpPtr == NULL)
-			cgp_throw(MEM_ERR, "");
-		strcpy(tmpPtr, tmp);
-		editor = String_toLowercase(tmpPtr);
-
-		// If it's different from all possible values
-		if (!StringArray_includes((char*[]){ "vscode", "rider", "none" }, 3, editor))
-			cgp_throw(INVALID_ARG, "Unsupported editor.");
-
-		free(tmpPtr); tmpPtr = NULL;
-
-	//? --license
-		tmp = cgp_getArgValue(argc, argv, "-li", "--license");
-		tmpLen = strlen(tmp);
-		if (tmpLen < 1) {
-			tmp = get_string_withDefault(
-				"Code License: ",
-				"GPLv3"
-			);
-			tmpLen = strlen(tmp);
-		}
-		// 								NUL
-		tmpPtr = malloc((tmpLen + 1) * sizeof(char));
-		if (tmpPtr == NULL)
-			cgp_throw(MEM_ERR, "");
-		strcpy(tmpPtr, tmp);
-		license = String_toLowercase(tmpPtr);
-
-		// If it's different from all possible values
-		if (!StringArray_includes((char*[]){ "gplv3", "mit" }, 2, license))
-			cgp_throw(INVALID_ARG, "Unsupported license.");
-
-		free(tmpPtr); tmpPtr = NULL;
+	license = cgp_getOrPromptArg(
+		argc, argv,
+		"-li", "--license", "Project License",
+		false, false,
+		"Code License: ", "GPLv3",
+		(char*[]){ "gplv3", "mit" }, 2
+	);
 	
-	//? --git
-		doGit = cgp_searchArgs(argc, argv, "-g", "--git");
+	doGit = cgp_searchArgs(argc, argv, "-g", "--git");
 
 	printf("Working...\n");
+
+	mkdir_p(outputDir);
+
 	char* project_name_lower_tmp = String_toLowercase(projectName);
 	char* PROJECT_FILENAME = String_replaceAllMulti(project_name_lower_tmp, (char*[]){" ", "/"}, (char*[]){"",""}, 2);
 	free(project_name_lower_tmp); project_name_lower_tmp = NULL;
 
-	//! GTK Project structure learned from https://gitlab.gnome.org/GNOME/gnome-builder/-/blob/main/src/plugins/meson-templates/resources
-	//!	As well as Ptyxis' project structure (I chose Ptyxis for no specific reason)
+	//* GTK Project structure learned from https://gitlab.gnome.org/GNOME/gnome-builder/-/blob/main/src/plugins/meson-templates/resources
+	//*	As well as Ptyxis' project structure (I chose Ptyxis for no specific reason)
 	if (!isExtension) {
 		if (!strcmp(projectLang, "c")) {
 			printf("\nCreating GTK4 app...\n\n");
 
-			//? meson.build
+			//^ meson.build
 			printf("Downloading meson.build...\n\n");
 			downloadFileAndReplace(
 				outputDir,
@@ -218,9 +137,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				false, false);
 
-			//? README.md
+			//^ README.md
 			printf("Downloading README.md...\n\n");
 			downloadFileAndReplace(
 				outputDir,
@@ -229,9 +149,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				false, false);
 
-			//? Flatpak manifest
+			//^ Flatpak manifest
 			printf("Downloading %s.json...\n\n", projectId);
 			downloadFileAndReplace(
 				outputDir,
@@ -240,25 +161,13 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				false, true);
 
-			//? src/
-			printf("Downloading %s-application.c...\n\n", PROJECT_FILENAME);
+			//^ src/
+			printf("Downloading src/%s-application.c...\n\n", PROJECT_FILENAME);
 			char* src_dir_tmp = path_join((char*[]){ outputDir, "src"}, 2);
-			struct stat srcStatBuffer;
-
-			// If it exists
-			if (stat(src_dir_tmp, &srcStatBuffer) == 0) {
-				// If it's not a dir
-				if (!S_ISDIR(srcStatBuffer.st_mode)) {
-					cgp_throw(INVALID_ARG, "--output-dir/src exists, it must be a directory.");
-				}
-			} else {
-				//! Create it, this WON'T WORK ON WINDOWS
-				if (mkdir(src_dir_tmp, 0777) != 0) {
-					cgp_throw(IO, "Couldn't create source directory.");
-				}
-			}
+			mkdir_p(src_dir_tmp);
 
 			downloadFileAndReplace(
 				src_dir_tmp,
@@ -267,9 +176,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				true, false);
 
-			printf("Downloading %s-application.h...\n\n", PROJECT_FILENAME);
+			printf("Downloading src/%s-application.h...\n\n", PROJECT_FILENAME);
 			downloadFileAndReplace(
 				src_dir_tmp,
 				"application.h",
@@ -277,9 +187,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				true, false);
 
-			printf("Downloading %s-window.c...\n\n", PROJECT_FILENAME);
+			printf("Downloading src/%s-window.c...\n\n", PROJECT_FILENAME);
 			downloadFileAndReplace(
 				src_dir_tmp,
 				"window.c",
@@ -287,9 +198,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				true, false);
 
-			printf("Downloading %s-window.h...\n\n", PROJECT_FILENAME);
+			printf("Downloading src/%s-window.h...\n\n", PROJECT_FILENAME);
 			downloadFileAndReplace(
 				src_dir_tmp,
 				"window.h",
@@ -297,9 +209,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				true, false);
 
-			printf("Downloading %s-window.ui...\n\n", PROJECT_FILENAME);
+			printf("Downloading src/%s-window.ui...\n\n", PROJECT_FILENAME);
 			downloadFileAndReplace(
 				src_dir_tmp,
 				"window.ui",
@@ -307,9 +220,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				true, false);
 
-			printf("Downloading %s-shortcuts.ui...\n\n", PROJECT_FILENAME);
+			printf("Downloading src/%s-shortcuts.ui...\n\n", PROJECT_FILENAME);
 			downloadFileAndReplace(
 				src_dir_tmp,
 				"shortcuts.ui",
@@ -317,9 +231,10 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				true, false);
 
-			printf("Downloading %s.gresource.xml...\n\n", PROJECT_FILENAME);
+			printf("Downloading src/%s.gresource.xml...\n\n", PROJECT_FILENAME);
 			char* gresource_name_temp = malloc(( strlen(PROJECT_FILENAME) + strlen(".gresource.xml") + 1) * sizeof(char));
 			if (gresource_name_temp == NULL) cgp_throw(MEM_ERR, "");
 			sprintf(gresource_name_temp, "%s.gresource.xml", PROJECT_FILENAME);
@@ -330,10 +245,11 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
 				false, false);
 			free(gresource_name_temp); gresource_name_temp = NULL;
 
-			printf("Downloading main.c...\n\n");
+			printf("Downloading src/main.c...\n\n");
 			downloadFileAndReplace(
 				src_dir_tmp,
 				"main.c",
@@ -341,64 +257,162 @@ int main(int argc, char* argv[]) {
 				projectName,
 				projectId,
 				authorName,
+				license,
+				false, false);
+
+			printf("Downloading src/meson.build...\n\n");
+			downloadFileAndReplace(
+				src_dir_tmp,
+				"meson.build",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/src/meson.build",
+				projectName,
+				projectId,
+				authorName,
+				license,
 				false, false);
 			free(src_dir_tmp); src_dir_tmp = NULL;
 
-			//? src/gtk
+			//^ src/gtk
 			char* gtk_dir_tmp = path_join((char*[]){ outputDir, "src", "gtk"}, 3);
-			struct stat gtkStatBuffer;
+			mkdir_p(gtk_dir_tmp); free(gtk_dir_tmp); gtk_dir_tmp = NULL;
 
-			// If it exists
-			if (stat(gtk_dir_tmp, &gtkStatBuffer) == 0) {
-				// If it's not a dir
-				if (!S_ISDIR(gtkStatBuffer.st_mode)) {
-					cgp_throw(INVALID_ARG, "--output-dir/src/gtk exists, it must be a directory.");
-				}
-			} else {
-				//! Create it, this WON'T WORK ON WINDOWS
-				if (mkdir(gtk_dir_tmp, 0777) != 0) {
-					cgp_throw(IO, "Couldn't create src/gtk directory.");
-				}
-			}
-			free(gtk_dir_tmp); gtk_dir_tmp = NULL;
+			//^ po/
+			char* po_dir_tmp = path_join((char*[]){ outputDir, "po"}, 2);
+			mkdir_p(po_dir_tmp);
 
-			//? data/
+			printf("Downloading po/meson.build...\n\n");
+			downloadFileAndReplace(
+				po_dir_tmp,
+				"meson.build",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/po/meson.build",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, false);
+
+			printf("Downloading po/POTFILES.in...\n\n");
+			downloadFileAndReplace(
+				po_dir_tmp,
+				"POTFILES.in",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/po/POTFILES.in",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, false);
+
+			printf("Downloading po/LINGUAS...\n\n");
+			downloadFileAndReplace(
+				po_dir_tmp,
+				"LINGUAS",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/po/LINGUAS",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, false);
+			free(po_dir_tmp); po_dir_tmp = NULL;
+
+			//^ data/
 			char* data_dir_tmp = path_join((char*[]){ outputDir, "data"}, 2);
-			struct stat dataStatBuffer;
-
-			// If it exists
-			if (stat(data_dir_tmp, &dataStatBuffer) == 0) {
-				// If it's not a dir
-				if (!S_ISDIR(dataStatBuffer.st_mode)) {
-					cgp_throw(INVALID_ARG, "--output-dir/data exists, it must be a directory.");
-				}
-			} else {
-				//! Create it, this WON'T WORK ON WINDOWS
-				if (mkdir(data_dir_tmp, 0777) != 0) {
-					cgp_throw(IO, "Couldn't create data directory.");
-				}
-			}
+			mkdir_p(data_dir_tmp);
 
 			char* icon_dir_tmp = path_join((char*[]){ outputDir, "data", "icons"}, 3);
-			struct stat iconStatBuffer;
+			mkdir_p(icon_dir_tmp);
 
-			// If it exists
-			if (stat(icon_dir_tmp, &iconStatBuffer) == 0) {
-				// If it's not a dir
-				if (!S_ISDIR(iconStatBuffer.st_mode)) {
-					cgp_throw(INVALID_ARG, "--output-dir/data/icons exists, it must be a directory.");
-				}
-			} else {
-				//! Create it, this WON'T WORK ON WINDOWS
-				if (mkdir(icon_dir_tmp, 0777) != 0) {
-					cgp_throw(IO, "Couldn't create icons directory.");
-				}
-			}
+			printf("Downloading data/%s.metainfo.xml.in...\n\n", projectId);
+			downloadFileAndReplace(
+				data_dir_tmp,
+				"metainfo.xml.in",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/data/metainfo.xml.in",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, true);
+
+			printf("Downloading data/%s.gschema.xml...\n\n", projectId);
+			downloadFileAndReplace(
+				data_dir_tmp,
+				"gschema.xml",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/data/gschema.xml",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, true);
+
+			printf("Downloading data/%s.desktop.in...\n\n", projectId);
+			downloadFileAndReplace(
+				data_dir_tmp,
+				"desktop.in",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/data/desktop.in",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, true);
+
+			printf("Downloading data/meson.build...\n\n");
+			downloadFileAndReplace(
+				data_dir_tmp,
+				"meson.build",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/data/meson.build",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, false);
+
+			//^ data/icons/
+			printf("Downloading data/icons/meson.build...\n\n");
+			downloadFileAndReplace(
+				icon_dir_tmp,
+				"meson.build",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/data/icons/meson.build",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, false);
+
+			char* scalable_apps_dir_tmp = path_join((char*[]){outputDir, "data", "icons", "hicolor", "scalable", "apps"}, 6);
+			char* symbolic_apps_dir_tmp = path_join((char*[]){outputDir, "data", "icons", "hicolor", "symbolic", "apps"}, 6);
+			mkdir_p(scalable_apps_dir_tmp); mkdir_p(symbolic_apps_dir_tmp);
+
+			printf("Downloading data/icons/hicolor/scalable/apps/%s.svg...\n\n", projectId);
+			downloadFileAndReplace(
+				scalable_apps_dir_tmp,
+				"svg",
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/data/icons/hicolor/scalable/apps/svg",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, true);
+
+			char* symbolic_name_tmp = malloc(( strlen(projectId) + strlen("-symbolic.svg") + 1 ) * sizeof(char));
+			if (symbolic_name_tmp == NULL) cgp_throw(MEM_ERR, "");
+			sprintf(symbolic_name_tmp, "%s-symbolic.svg", projectId);
+
+			printf("Downloading data/icons/hicolor/symbolic/apps/%s-symbolic.svg...\n\n", projectId);
+			downloadFileAndReplace(
+				symbolic_apps_dir_tmp,
+				symbolic_name_tmp,
+				"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/data/icons/hicolor/symbolic/apps/svg",
+				projectName,
+				projectId,
+				authorName,
+				license,
+				false, false);
+			free(symbolic_name_tmp); symbolic_name_tmp = NULL;
+
+			free(scalable_apps_dir_tmp); scalable_apps_dir_tmp = NULL;
+			free(symbolic_apps_dir_tmp); symbolic_apps_dir_tmp = NULL;
 			free(icon_dir_tmp); icon_dir_tmp = NULL;
-
-			
-			
 			free(data_dir_tmp); data_dir_tmp = NULL;
+			finishAndGreet(isExtension, isLibadwaita, outputDir);
 		} else {
 			cgp_throw(PROGRAM_ERR, "The programming language you chose is not yet implemented.");
 		}
