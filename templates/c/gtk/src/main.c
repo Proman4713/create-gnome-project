@@ -1,11 +1,11 @@
-/* {{FILENAME}}-application.c
+/* main.c
  *
  * Place your license here
  */
 
 #include "config.h"
 
-#include <glib-2.0/glib/gi18n.h>
+#include <glib/gi18n.h>
 
 #include "{{FILENAME}}-application.h"
 

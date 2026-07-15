@@ -1,4 +1,4 @@
-/* {{FILENAME}}-application.c
+/* {{FILENAME}}-window.c
  *
  * Place your license here
  */

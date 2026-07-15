@@ -1,0 +1,8 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+data/{{PROJECT_ID}}.desktop.in
+data/{{PROJECT_ID}}.metainfo.xml.in
+data/{{PROJECT_ID}}.gschema.xml
+src/main.c
+src/{{FILENAME}}-window.c
+src/{{FILENAME}}-window.ui

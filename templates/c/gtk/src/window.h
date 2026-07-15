@@ -1,15 +1,15 @@
-/* {{FILENAME}}-application.c
+/* {{FILENAME}}-window.h
  *
  * Place your license here
  */
 
 #pragma once
 
-#include <gtk-4.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-#define {{PREFIX}}_TYPE_WINDOW ({{FILENAME}}_window_get_type())
+#define {{NAME_CAPS}}_TYPE_WINDOW ({{FILENAME}}_window_get_type())
 
 G_DECLARE_FINAL_TYPE ({{PascalName}}Window, {{FILENAME}}_window, {{NAME_CAPS}}, WINDOW, GtkApplicationWindow)
 

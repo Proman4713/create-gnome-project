@@ -1,11 +1,11 @@
-/* {{FILENAME}}-application.c
+/* {{FILENAME}}-application.h
  *
  * Place your license here
  */
 
 #pragma once
 
-#include <gtk-4.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
