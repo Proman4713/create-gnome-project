@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 		argc, argv,
 		"-l", "--lang", "Project Language",
 		true, false,
-		"Language: ", "JavaScript",
+		"Language: ", "C",
 		(char*[]){ "c", "javascript" }, 2
 	);
 

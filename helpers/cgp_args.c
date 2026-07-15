@@ -11,7 +11,7 @@ const char* CGP_OPTIONS[MAX_OPTIONS][3] = {
 	{"-a", "--author", "Project Author. Default: John Doe"},
 	{"-i", "--id", "Application ID for GTK apps or extension ID for extensions. Default: com.example.MyProgram"},
 	{"-o", "--output-dir", "Output directory. Default: ./"},
-	{"-l", "--lang", "Programming Language. Available options: JavaScript, C. Default: JavaScript"},
+	{"-l", "--lang", "Programming Language. Available options: JavaScript, C. Default: C"},
 	{"-e", "--editor", "Configure editor or IDE to work immediately. Available options: VSCode, Rider, None. Default: None"},
 	{"-li", "--license", "Code License. Available options: GPLv3, MIT. Default: GPLv3"},
 	// Terminal styling courtesy of my own javascript library, https://github.com/Proman4713/javascript-console-styling
