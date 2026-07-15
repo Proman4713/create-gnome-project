@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+
+DESTDIR=debian/create-gnome-project
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	install -d $(DESTDIR)/usr/bin/
+	install -m 755 dist/create-gnome-project		$(DESTDIR)/usr/bin/create-gnome-project
+
+	install -d $(DESTDIR)/usr/share/doc/create-gnome-project/
+	install -m 644 LICENSE		$(DESTDIR)/usr/share/doc/create-gnome-project/
+	install -m 644 README.md		$(DESTDIR)/usr/share/doc/create-gnome-project/
+
+override_dh_auto_build:
+	make

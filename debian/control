@@ -1,0 +1,10 @@
+Source: create-gnome-project
+Section: utils
+Priority: optional
+Maintainer: Aaser Abd-el Sabour <proman4713@gmail.com>
+Build-Depends: debhelper-compat (= 13),gcc,make,libcs50,libcurl4-openssl-dev
+
+Package: create-gnome-project
+Architecture: any
+Description: Create basic GNOME shell extensions and GTK4/Libadwaita apps
+Depends: gcc,git,libgtk-4-dev,build-essential,pkg-config,meson,ninja-build,libcurl4-openssl-dev,desktop-file-utils

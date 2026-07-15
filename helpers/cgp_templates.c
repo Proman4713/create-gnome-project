@@ -107,10 +107,15 @@ char* projectIdToFile(char* filename, char* PROJECT_ID) {
 	return name_tmp;
 }
 
-void finishAndGreet(bool isExtension, bool isLibadwaita, char* outputDir) {
+void finishAndGreet(bool isExtension, bool isLibadwaita, bool doGit, char* outputDir) {
+	chdir(outputDir);
+	if (doGit)
+		system("git init");
+	else
+		printf("Skipping git, -g/--git flags not provided.\n\n");
+
 	if (!isExtension) {
 		printf("Running meson...\n\n");
-		chdir(outputDir);
 		system("meson setup builddir");
 		if (isLibadwaita) {
 			printf("\x1b[32mGood luck on your GTK4/Libadwaita app :D\x1b[0m\n");

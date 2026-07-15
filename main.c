@@ -122,8 +122,9 @@ int main(int argc, char* argv[]) {
 	char* PROJECT_FILENAME = String_replaceAllMulti(project_name_lower_tmp, (char*[]){" ", "/"}, (char*[]){"",""}, 2);
 	free(project_name_lower_tmp); project_name_lower_tmp = NULL;
 
+	const char* NOT_IMPLEMENTED = "The template you chose is not yet implemented :(";
+
 	//* GTK Project structure learned from https://gitlab.gnome.org/GNOME/gnome-builder/-/blob/main/src/plugins/meson-templates/resources
-	//*	As well as Ptyxis' project structure (I chose Ptyxis for no specific reason)
 	if (!isExtension) {
 		if (!strcmp(projectLang, "c")) {
 			printf("\nCreating GTK4 app...\n\n");
@@ -412,11 +413,14 @@ int main(int argc, char* argv[]) {
 			free(symbolic_apps_dir_tmp); symbolic_apps_dir_tmp = NULL;
 			free(icon_dir_tmp); icon_dir_tmp = NULL;
 			free(data_dir_tmp); data_dir_tmp = NULL;
-			finishAndGreet(isExtension, isLibadwaita, outputDir);
 		} else {
-			cgp_throw(PROGRAM_ERR, "The programming language you chose is not yet implemented.");
+			cgp_throw(PROGRAM_ERR, NOT_IMPLEMENTED);
 		}
+	} else {
+		cgp_throw(PROGRAM_ERR, NOT_IMPLEMENTED);
 	}
+
+	finishAndGreet(isExtension, isLibadwaita, doGit, outputDir);
 
 	// Free memory
 	if (PROJECT_FILENAME != NULL) free(PROJECT_FILENAME);

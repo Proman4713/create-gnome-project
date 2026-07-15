@@ -19,4 +19,4 @@ char* projectFilenameToFile(char* filename, char* PROJECT_FILENAME);
 
 char* projectIdToFile(char* filename, char* PROJECT_ID);
 
-void finishAndGreet(bool isExtension, bool isLibadwaita, char* outputDir);
+void finishAndGreet(bool isExtension, bool isLibadwaita, bool doGit, char* outputDir);

@@ -3,7 +3,7 @@ default: create-gnome-project
 objs=helpers/cgp_errors.o helpers/cgp_utils.o helpers/cgp_args.o helpers/cgp_templates.o
 create-gnome-project: $(objs) main.c
 	mkdir -p dist
-	gcc $^ -o dist/$@ -lcs50 -lcurl
+	gcc $^ -o dist/$@ /usr/lib/libcs50.a -lcurl
 
 debug: CFLAGS=-g -fdiagnostics-color=always -O0
 debug: $(objs) main.c
