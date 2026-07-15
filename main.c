@@ -452,7 +452,7 @@ int main(int argc, char* argv[]) {
 
 				free(vscode_dir_tmp); vscode_dir_tmp = NULL;
 			} else if (!strcmp(editor, "rider")) {
-				char* rider_dir_tmp = path_join((char*[]){outputDir, ".idea"}, 2);
+				char* rider_dir_tmp = path_join((char*[]){outputDir, ".idea", "runConfigurations"}, 3);
 				mkdir_p(rider_dir_tmp);
 
 				printf("Downloading .idea/runConfigurations/Build_and_debug_GTK4_app.xml...\n\n");
