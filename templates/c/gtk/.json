@@ -30,7 +30,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "file://."
+                    "url" : "file://{{PROJECT_PATH}}"
                 }
             ]
         }

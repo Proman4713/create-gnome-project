@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build GTK4 app",
+			"command": "meson compile",
+			"type": "shell",
+			"args": [
+				"-C",
+				"builddir"
+			],
+			"problemMatcher": [],
+		},
+	]
+}
