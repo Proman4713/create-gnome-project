@@ -139,9 +139,10 @@ char* cgp_getOrPromptArg(
 	tmpLen = strlen(value_tmp);
 	if (tmpLen < 1) {
 		if (required) {
-			char* err_tmp = malloc(( strlen(argName) + strlen(" required.") + 1 ) * sizeof(char));
+			size_t err_tmp_len = strlen(argName) + strlen(" required.") + 1;
+			char* err_tmp = malloc(err_tmp_len * sizeof(char));
 			if (err_tmp == NULL) cgp_throw(MEM_ERR, "");
-			strcpy(err_tmp, argName); strcat(err_tmp, " required.");
+			snprintf(err_tmp, err_tmp_len, "%s required.", argName);
 			cgp_throw(INVALID_ARG, err_tmp);
 			// No need to free err_tmp, already thrown and exited
 		} else {
@@ -155,19 +156,21 @@ char* cgp_getOrPromptArg(
 	char* lower_tmp = String_toLowercase(value_tmp);
 	if (lower_tmp == NULL) cgp_throw(MEM_ERR, "");
 	if (allowedOptions != NULL && allowedOptionCount > 0 && !StringArray_includes(allowedOptions, allowedOptionCount, lower_tmp)) {
-		char* err_tmp = malloc(( strlen("Invalid ") + strlen(argName) + strlen(".") + 1 ) * sizeof(char));
+		size_t err_tmp_len = strlen("Invalid ") + strlen(argName) + strlen(".") + 1;
+		char* err_tmp = malloc(err_tmp_len * sizeof(char));
 		if (err_tmp == NULL) cgp_throw(MEM_ERR, "");
-		strcpy(err_tmp, "Invalid "); strcat(err_tmp, argName); strcat(err_tmp, ".");
+		snprintf(err_tmp, err_tmp_len, "Invalid %s.", argName);
 		cgp_throw(INVALID_ARG, err_tmp);
 	}
 
-	char* argValue = malloc((tmpLen + 1) * sizeof(char));
+	size_t argValueLen = tmpLen + 1;
+	char* argValue = malloc(argValueLen * sizeof(char));
 	if (argValue == NULL) cgp_throw(MEM_ERR, "");
 
 	if (lower) {
-		strcpy(argValue, lower_tmp);
+		strncpy(argValue, lower_tmp, argValueLen);
 	} else {
-		strcpy(argValue, value_tmp);
+		strncpy(argValue, value_tmp, argValueLen);
 	}
 	free(lower_tmp); lower_tmp = NULL;
 

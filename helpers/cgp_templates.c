@@ -17,17 +17,18 @@ void downloadFileAndReplace(
 	char* FILENAME = String_replaceAllMulti(project_name_lower_tmp, (char*[]){" ", "/"}, (char*[]){"",""}, 2);
 	free(project_name_lower_tmp); project_name_lower_tmp = NULL;
 
-	char* temp_cat_tmp = malloc(( strlen(filename) + strlen(".tmp") + 1) * sizeof(char));
-	if (temp_cat_tmp == NULL)
+	size_t name_cat_tmp_len = strlen(filename) + strlen(".tmp") + 1;
+	char* name_cat_tmp = malloc(name_cat_tmp_len * sizeof(char));
+	if (name_cat_tmp == NULL)
 		cgp_throw(MEM_ERR, "");
-	strcpy(temp_cat_tmp, filename); strcat(temp_cat_tmp, ".tmp");
+	snprintf(name_cat_tmp, name_cat_tmp_len, "%s.tmp", filename);
 
-	char* tempFilepath = path_join((char*[]){directory, temp_cat_tmp}, 2);
+	char* tempFilepath = path_join((char*[]){directory, name_cat_tmp}, 2);
 	char* localFilename = appendProjectFilename ? projectFilenameToFile(filename, FILENAME)
 												: (appendProjectId ? projectIdToFile(filename, PROJECT_ID)
 																  : filename);
 	char* filepath = path_join((char*[]){directory, localFilename}, 2);
-	free(temp_cat_tmp); temp_cat_tmp = NULL;
+	free(name_cat_tmp); name_cat_tmp = NULL;
 
 	FILE* tempBinPtr = fopen(tempFilepath, "wb");
 	if (tempBinPtr == NULL) cgp_throw(MEM_ERR, "");
@@ -37,8 +38,9 @@ void downloadFileAndReplace(
 		URL);
 
 	if (downloadRes != CURLE_OK) {
-		char* err_tmp = malloc(( strlen("Couldn't download ") + strlen(filename) + strlen(".") + 1 ) * sizeof(char));
-		strcpy(err_tmp, "Couldn't download "); strcat(err_tmp, filename); strcat(err_tmp, ".");
+		size_t err_tmp_len = strlen("Couldn't download ") + strlen(filename) + strlen(".") + 1;
+		char* err_tmp = malloc(err_tmp_len * sizeof(char));
+		snprintf(err_tmp, err_tmp_len, "Couldn't download %s.", filename);
 		cgp_throw(PROGRAM_ERR, err_tmp);
 		free(err_tmp); err_tmp = NULL;
 	}
@@ -64,8 +66,9 @@ void downloadFileAndReplace(
 	char* PascalName = String_toPascalcase(PROJECT_NAME);
 
 	char* proj_id_path_tmp = String_replaceAll(PROJECT_ID, ".", "/");
-	char* PROJECT_ID_PATH = malloc(( strlen("/") + strlen(proj_id_path_tmp) + 1 ) * sizeof(char));
-	strcpy(PROJECT_ID_PATH, "/"); strcat(PROJECT_ID_PATH, proj_id_path_tmp);
+	size_t proj_id_path_len = strlen("/") + strlen(proj_id_path_tmp) + 1;
+	char* PROJECT_ID_PATH = malloc(proj_id_path_len * sizeof(char));
+	snprintf(PROJECT_ID_PATH, proj_id_path_len, "/%s", proj_id_path_tmp);
 	free(proj_id_path_tmp); proj_id_path_tmp = NULL;
 
 	/*
@@ -103,17 +106,19 @@ void downloadFileAndReplace(
 }
 
 char* projectFilenameToFile(char* filename, char* PROJECT_FILENAME) {
-	char* name_tmp = malloc((strlen(PROJECT_FILENAME) + strlen("-") + strlen(filename) + 1) * sizeof(char));
+	size_t name_tmp_len = strlen(PROJECT_FILENAME) + strlen("-") + strlen(filename) + 1;
+	char* name_tmp = malloc(name_tmp_len * sizeof(char));
 	if (name_tmp == NULL) cgp_throw(MEM_ERR, "");
-	strcpy(name_tmp, PROJECT_FILENAME); strcat(name_tmp, "-"); strcat(name_tmp, filename);
+	snprintf(name_tmp, name_tmp_len, "%s-%s", PROJECT_FILENAME, filename);
 
 	return name_tmp;
 }
 
 char* projectIdToFile(char* filename, char* PROJECT_ID) {
-	char* name_tmp = malloc((strlen(PROJECT_ID) + strlen(".") + strlen(filename) + 1) * sizeof(char));
+	size_t name_tmp_len = strlen(PROJECT_ID) + strlen(".") + strlen(filename) + 1;
+	char* name_tmp = malloc(name_tmp_len * sizeof(char));
 	if (name_tmp == NULL) cgp_throw(MEM_ERR, "");
-	strcpy(name_tmp, PROJECT_ID); strcat(name_tmp, "."); strcat(name_tmp, filename);
+	snprintf(name_tmp, name_tmp_len, "%s.%s", PROJECT_ID, filename);
 
 	return name_tmp;
 }

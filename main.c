@@ -246,9 +246,11 @@ int main(int argc, char* argv[]) {
 				true, false);
 
 			printf("Downloading src/%s.gresource.xml...\n\n", PROJECT_FILENAME);
-			char* gresource_name_temp = malloc(( strlen(PROJECT_FILENAME) + strlen(".gresource.xml") + 1) * sizeof(char));
+			const size_t gresource_name_len = strlen(PROJECT_FILENAME) + strlen(".gresource.xml") + 1;
+			char* gresource_name_temp = malloc(gresource_name_len * sizeof(char));
 			if (gresource_name_temp == NULL) cgp_throw(MEM_ERR, "");
-			sprintf(gresource_name_temp, "%s.gresource.xml", PROJECT_FILENAME);
+			snprintf(gresource_name_temp, gresource_name_len, "%s.gresource.xml", PROJECT_FILENAME);
+
 			downloadFileAndReplace(
 				src_dir_tmp,
 				gresource_name_temp,
@@ -403,9 +405,10 @@ int main(int argc, char* argv[]) {
 				license,
 				false, true);
 
-			char* symbolic_name_tmp = malloc(( strlen(projectId) + strlen("-symbolic.svg") + 1 ) * sizeof(char));
+			size_t symbolic_name_len = strlen(projectId) + strlen("-symbolic.svg") + 1;
+			char* symbolic_name_tmp = malloc(symbolic_name_len * sizeof(char));
 			if (symbolic_name_tmp == NULL) cgp_throw(MEM_ERR, "");
-			sprintf(symbolic_name_tmp, "%s-symbolic.svg", projectId);
+			snprintf(symbolic_name_tmp, symbolic_name_len, "%s-symbolic.svg", projectId);
 
 			printf("Downloading data/icons/hicolor/symbolic/apps/%s-symbolic.svg...\n\n", projectId);
 			downloadFileAndReplace(

@@ -1,4 +1,11 @@
-create-gnome-project (1.0.0) resolute; urgency=medium
+create-gnome-project (1.1.0) abstract; urgency=medium
+
+  * Add VSCode and JetBrains Rider support
+  * Improve code reliability
+
+ -- Aaser Abd-el Sabour <proman4713@gmail.com>  Thu, 16 Jul 2026 01:12:28 +0300
+
+create-gnome-project (1.0.0) abstract; urgency=medium
 
   * Initial release.
 

@@ -43,9 +43,10 @@ void mkdir_p(const char* path) {
 	if (stat(path, &statBuffer) == 0) {
 		// If it's not a dir
 		if (!S_ISDIR(statBuffer.st_mode)) {
-			char* err_tmp = malloc(( strlen(path) + strlen(" must be a directory.") + 1 ) * sizeof(char));
+			size_t err_tmp_len = strlen(path) + strlen(" must be a directory.") + 1;
+			char* err_tmp = malloc(err_tmp_len * sizeof(char));
 			if (err_tmp == NULL) cgp_throw(MEM_ERR, "");
-			strcpy(err_tmp, path); strcat(err_tmp, " must be a directory.");
+			snprintf(err_tmp, err_tmp_len, "%s must be a directory.", path);
 			cgp_throw(INVALID_ARG, err_tmp);
 		}
 	} else {
@@ -67,15 +68,17 @@ void mkdir_p(const char* path) {
 							chdir(dir);
 							continue;
 						} else {
-							char* err_tmp = malloc(( strlen(dir) + strlen(" exists but is not a directory.") + 1 ) * sizeof(char));
-							strcpy(err_tmp, dir); strcat(err_tmp, " exists but is not a directory.");
+							size_t err_tmp_len = strlen(dir) + strlen(" exists but is not a directory.") + 1;
+							char* err_tmp = malloc(err_tmp_len * sizeof(char));
+							snprintf(err_tmp, err_tmp_len, "%s exists but is not a directory.", dir);
 							cgp_throw(IO, err_tmp);
 						}
 					}
 				}
 
-				char* err_tmp = malloc(( strlen("Couldn't create directory ") + strlen(dir) + 1 ) * sizeof(char));
-				strcpy(err_tmp, "Couldn't create directory "); strcat(err_tmp, dir);
+				size_t err_tmp_len = strlen("Couldn't create directory ") + strlen(dir) + 1;
+				char* err_tmp = malloc(err_tmp_len * sizeof(char));
+				snprintf(err_tmp, err_tmp_len, "Couldn't create directory %s", dir);
 				cgp_throw(IO, err_tmp);
 			}
 
@@ -548,9 +551,10 @@ DynStringArray new_DynStringArray(char* array[], unsigned int initialLength) {
 
 //* Push an element to a dynamic string array
 unsigned int DynStringArray_push(DynStringArray* dynamicArray, char* item) {
-	char* newItem = malloc((strlen(item) + 1) * sizeof(char));
+	size_t newItemLen = strlen(item) + 1;
+	char* newItem = malloc(newItemLen * sizeof(char));
 	if (newItem == NULL) cgp_throw(MEM_ERR, "");
-	strcpy(newItem, item);
+	strncpy(newItem, item, newItemLen);
 
 	if (dynamicArray->array == NULL) {
 		DynStringArray newArray;
