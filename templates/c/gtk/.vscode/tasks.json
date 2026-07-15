@@ -3,9 +3,10 @@
 	"tasks": [
 		{
 			"label": "Build GTK4 app",
-			"command": "meson compile",
+			"command": "meson",
 			"type": "shell",
 			"args": [
+				"compile",
 				"-C",
 				"builddir"
 			],

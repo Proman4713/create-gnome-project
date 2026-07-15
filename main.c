@@ -1,5 +1,6 @@
 // TODO: Find an alternative
 #include <cs50.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -117,6 +118,15 @@ int main(int argc, char* argv[]) {
 	printf("Working...\n");
 
 	mkdir_p(outputDir);
+	DIR* output_dir_tmp = opendir(outputDir);
+	if (output_dir_tmp == NULL) cgp_throw(IO, "Couldn't check output directory.");
+	unsigned int dir_content_count = 0;
+	while (readdir(output_dir_tmp) != NULL) {
+		dir_content_count++;
+	}
+	// if it has more than . and ..
+	if (dir_content_count > 2) cgp_throw(IO, "Output directory not empty.");
+	closedir(output_dir_tmp); output_dir_tmp = NULL;
 
 	char* project_name_lower_tmp = String_toLowercase(projectName);
 	char* PROJECT_FILENAME = String_replaceAllMulti(project_name_lower_tmp, (char*[]){" ", "/"}, (char*[]){"",""}, 2);
@@ -413,6 +423,62 @@ int main(int argc, char* argv[]) {
 			free(symbolic_apps_dir_tmp); symbolic_apps_dir_tmp = NULL;
 			free(icon_dir_tmp); icon_dir_tmp = NULL;
 			free(data_dir_tmp); data_dir_tmp = NULL;
+
+			if (!strcmp(editor, "vscode")) {
+				char* vscode_dir_tmp = path_join((char*[]){outputDir, ".vscode"}, 2);
+				mkdir_p(vscode_dir_tmp);
+
+				printf("Downloading .vscode/launch.json...\n\n");
+				downloadFileAndReplace(
+					vscode_dir_tmp,
+					"launch.json",
+					"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/.vscode/launch.json",
+					projectName,
+					projectId,
+					authorName,
+					license,
+					false, false);
+
+				printf("Downloading .vscode/tasks.json...\n\n");
+				downloadFileAndReplace(
+					vscode_dir_tmp,
+					"tasks.json",
+					"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/.vscode/tasks.json",
+					projectName,
+					projectId,
+					authorName,
+					license,
+					false, false);
+
+				free(vscode_dir_tmp); vscode_dir_tmp = NULL;
+			} else if (!strcmp(editor, "rider")) {
+				char* rider_dir_tmp = path_join((char*[]){outputDir, ".idea"}, 2);
+				mkdir_p(rider_dir_tmp);
+
+				printf("Downloading .idea/runConfigurations/Build_and_debug_GTK4_app.xml...\n\n");
+				downloadFileAndReplace(
+					rider_dir_tmp,
+					"Build_and_debug_GTK4_app.xml",
+					"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/.idea/runConfigurations/Build_and_debug_GTK4_app.xml",
+					projectName,
+					projectId,
+					authorName,
+					license,
+					false, false);
+
+				printf("Downloading .idea/runConfigurations/build_debug.sh...\n\n");
+				downloadFileAndReplace(
+					rider_dir_tmp,
+					"build_debug.sh",
+					"https://raw.githubusercontent.com/Proman4713/create-gnome-project/refs/heads/main/templates/c/gtk/.idea/runConfigurations/build_debug.sh",
+					projectName,
+					projectId,
+					authorName,
+					license,
+					false, false);
+
+				free(rider_dir_tmp); rider_dir_tmp = NULL;
+			}
 		} else {
 			cgp_throw(PROGRAM_ERR, NOT_IMPLEMENTED);
 		}

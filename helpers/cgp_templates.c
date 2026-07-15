@@ -43,7 +43,7 @@ void downloadFileAndReplace(
 		free(err_tmp); err_tmp = NULL;
 	}
 
-	fclose(tempBinPtr);
+	fclose(tempBinPtr); tempBinPtr = NULL;
 
 	FILE* tempReadPtr = fopen(tempFilepath, "r");
 	if (tempReadPtr == NULL) cgp_throw(MEM_ERR, "");
@@ -67,13 +67,23 @@ void downloadFileAndReplace(
 	char* PROJECT_ID_PATH = malloc(( strlen("/") + strlen(proj_id_path_tmp) + 1 ) * sizeof(char));
 	strcpy(PROJECT_ID_PATH, "/"); strcat(PROJECT_ID_PATH, proj_id_path_tmp);
 	free(proj_id_path_tmp); proj_id_path_tmp = NULL;
+
+	/*
+		For flatpak manifest, this gets the path of whatever directory is currently being downloaded to,
+		! luckily the flatpak manifest is in outputDir, but I should keep that in mind
+	*/
+	char* curDir = getcwd(NULL, 0);
+	chdir(directory);
+	char* PROJECT_PATH = getcwd(NULL, 0);
+	chdir(curDir);
+	free(curDir); curDir = NULL;
 	
 	while (fgets(lineBuffer, sizeof(lineBuffer), tempReadPtr) != NULL) {
 		char* filteredLine = String_replaceAllMulti(
 			lineBuffer,
-			(char*[]){	"{{FILENAME}}",	"{{PROJECT_NAME}}", "{{NAME_CAPS}}",	"{{PROJECT_ID}}", "{{PascalName}}", "{{AUTHOR}}", "{{YEAR}}",	"{{PROJECT_ID_PATH}}",	"{{PROJECT_LICENSE}}" },
-			(char*[]){	FILENAME,		PROJECT_NAME,		NAME_CAPS,			PROJECT_ID,		  PascalName,		AUTHOR,		  YEAR,			PROJECT_ID_PATH,		PROJECT_LICENSE },
-			9);
+			(char*[]){	"{{FILENAME}}",	"{{PROJECT_NAME}}", "{{NAME_CAPS}}",	"{{PROJECT_ID}}", "{{PascalName}}", "{{AUTHOR}}", "{{YEAR}}",	"{{PROJECT_ID_PATH}}",	"{{PROJECT_LICENSE}}", "{{PROJECT_PATH}}" },
+			(char*[]){	FILENAME,		PROJECT_NAME,		NAME_CAPS,			PROJECT_ID,		  PascalName,		AUTHOR,		  YEAR,			PROJECT_ID_PATH,		PROJECT_LICENSE,		PROJECT_PATH },
+			10);
 		fputs(filteredLine, writePtr);
 		free(filteredLine);
 	}
@@ -83,6 +93,7 @@ void downloadFileAndReplace(
 	fclose(writePtr); writePtr = NULL;
 
 	if (appendProjectFilename || appendProjectId) { free(localFilename); localFilename == NULL; }
+	free(PROJECT_PATH); PROJECT_PATH = NULL;
 	free(PROJECT_ID_PATH); PROJECT_ID_PATH = NULL;
 	free(tempFilepath); tempFilepath = NULL;
 	free(NAME_CAPS); NAME_CAPS = NULL;
@@ -109,9 +120,13 @@ char* projectIdToFile(char* filename, char* PROJECT_ID) {
 
 void finishAndGreet(bool isExtension, bool isLibadwaita, bool doGit, char* outputDir) {
 	chdir(outputDir);
-	if (doGit)
+	if (doGit) {
 		system("git init");
-	else
+		FILE* gitignorePtr = fopen(".gitignore", "w");
+		if (gitignorePtr == NULL) cgp_throw(IO, "Couldn't open .gitignore.");
+		fputs("builddir/", gitignorePtr);
+		fclose(gitignorePtr);
+	} else
 		printf("Skipping git, -g/--git flags not provided.\n\n");
 
 	if (!isExtension) {
