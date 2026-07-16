@@ -1,3 +1,11 @@
+create-gnome-project (1.2.0) abstract; urgency=medium
+
+  * Update description
+  * Add license support for GPLv3 and MIT
+  * Make slight code refactors
+
+ -- Aaser Abd-el Sabour <proman4713@gmail.com>  Thu, 16 Jul 2026 17:54:30 +0300
+
 create-gnome-project (1.1.0) abstract; urgency=medium
 
   * Add VSCode and JetBrains Rider support

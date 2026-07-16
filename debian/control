@@ -6,5 +6,5 @@ Build-Depends: debhelper-compat (= 13),gcc,make,libcs50,libcurl4-openssl-dev
 
 Package: create-gnome-project
 Architecture: any
-Description: Create basic GNOME shell extensions and GTK4/Libadwaita apps
+Description: A simple C utility that creates a template GNOME shell extension or GTK4 application
 Depends: gcc,git,libgtk-4-dev,build-essential,pkg-config,meson,ninja-build,libcurl4-openssl-dev,desktop-file-utils

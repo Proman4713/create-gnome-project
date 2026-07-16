@@ -3,6 +3,17 @@
 #include <time.h>
 #include <stdbool.h>
 
+#define LINE_BUFFER_LENGTH 256
+
+void downloadFileAndIterate(
+	char* directory,
+	char* filename,
+	char* URL,
+	char* patterns[],
+	char* replacements[],
+	size_t filterCount
+);
+
 void downloadFileAndReplace(
 	char* directory,
 	char* filename,
@@ -15,8 +26,8 @@ void downloadFileAndReplace(
 	bool appendProjectId
 );
 
-char* projectFilenameToFile(char* filename, char* PROJECT_FILENAME);
+char* projectDataToFile(char* filename, char* PROJECT_DATA, char* SEP);
 
-char* projectIdToFile(char* filename, char* PROJECT_ID);
+void implantLicenseFile(char* PROJECT_LICENSE, char* AUTHOR, char* outputDir);
 
 void finishAndGreet(bool isExtension, bool isLibadwaita, bool doGit, char* outputDir);

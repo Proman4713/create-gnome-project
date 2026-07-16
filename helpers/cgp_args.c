@@ -29,6 +29,7 @@ void cgp_printHelp() {
 
 	for (int i = 0; i < MAX_OPTIONS; i++) {
 		const char** optionData = CGP_OPTIONS[i];
+		// File-level values are apparently instantiated with NULLs, so this wouldn't work if this was an in-scope array
 		if (optionData[0] == NULL)
 			break; // We've reached the end, otherwise we would have data at that index.
 

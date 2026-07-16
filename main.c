@@ -10,19 +10,32 @@
 #include "helpers/cgp_utils.h"
 
 int main(int argc, char* argv[]) {
-	if (argc < 2) {
+	char* header =  "create-gnome-project  Copyright (C) 2026  Aaser Abd-el Sabour\n"
+					"This program comes with ABSOLUTELY NO WARRANTY.\n"
+					"This is free software, and you are welcome to redistribute it\n"
+					"under certain conditions; type `create-gnome-project c` for details.\n\n";
+
+	if (argc < 2 || cgp_searchArgs(argc, argv, "--help", "-h")) {
+		printf("%s", header);
 		cgp_printHelp();
 		exit(0);
 	}
 
-	if (cgp_searchArgs(argc, argv, "--help", "-h")) {
-		cgp_printHelp();
+	if (!strcmp(argv[1], "c")) {
+		printf(
+			"Copyright (C) 2026  Aaser Abd-el Sabour\n"
+			"\n"
+			"This program is free software: you can redistribute it and/or modify\n"
+			"it under the terms of the GNU General Public License as published by\n"
+			"the Free Software Foundation, version 3.\n"
+		);
 		exit(0);
 	}
 
 	cgp_validateArgs(argc, argv);
 
 	if (!cgp_searchArgs(argc, argv, "-p", "--project")) {
+		printf("%s", header);
 		cgp_printHelp();
 		exit(1);
 	}
@@ -40,11 +53,6 @@ int main(int argc, char* argv[]) {
 	bool isExtension = false;
 	bool isLibadwaita = false;
 
-	//* Reusable variables
-	char* tmp = NULL;
-	unsigned int tmpLen = 0;
-	char* tmpPtr = NULL;
-
 	projectType = cgp_getOrPromptArg(
 		argc, argv,
 		"-p", "--project", "Project Type",
@@ -56,6 +64,7 @@ int main(int argc, char* argv[]) {
 	isExtension = !strcmp(projectType, "extension");
 	isLibadwaita = !strcmp(projectType, "libadwaita");
 
+	printf("%s", header);
 
 	projectName = cgp_getOrPromptArg(
 		argc, argv,
@@ -108,11 +117,11 @@ int main(int argc, char* argv[]) {
 	license = cgp_getOrPromptArg(
 		argc, argv,
 		"-li", "--license", "Project License",
-		false, false,
+		true, false,
 		"Code License: ", "GPLv3",
 		(char*[]){ "gplv3", "mit" }, 2
 	);
-	
+
 	doGit = cgp_searchArgs(argc, argv, "-g", "--git");
 
 	printf("Working...\n");
@@ -135,7 +144,7 @@ int main(int argc, char* argv[]) {
 	const char* NOT_IMPLEMENTED = "The template you chose is not yet implemented :(";
 
 	//* GTK Project structure learned from https://gitlab.gnome.org/GNOME/gnome-builder/-/blob/main/src/plugins/meson-templates/resources
-	if (!isExtension) {
+	if (!isExtension && !isLibadwaita) {
 		if (!strcmp(projectLang, "c")) {
 			printf("\nCreating GTK4 app...\n\n");
 
@@ -245,12 +254,8 @@ int main(int argc, char* argv[]) {
 				license,
 				true, false);
 
-			printf("Downloading src/%s.gresource.xml...\n\n", PROJECT_FILENAME);
-			const size_t gresource_name_len = strlen(PROJECT_FILENAME) + strlen(".gresource.xml") + 1;
-			char* gresource_name_temp = malloc(gresource_name_len * sizeof(char));
-			if (gresource_name_temp == NULL) cgp_throw(MEM_ERR, "");
-			snprintf(gresource_name_temp, gresource_name_len, "%s.gresource.xml", PROJECT_FILENAME);
-
+			char* gresource_name_temp = projectDataToFile("gresource.xml", PROJECT_FILENAME, ".");
+			printf("Downloading src/%s...\n\n", gresource_name_temp);
 			downloadFileAndReplace(
 				src_dir_tmp,
 				gresource_name_temp,
@@ -405,12 +410,8 @@ int main(int argc, char* argv[]) {
 				license,
 				false, true);
 
-			size_t symbolic_name_len = strlen(projectId) + strlen("-symbolic.svg") + 1;
-			char* symbolic_name_tmp = malloc(symbolic_name_len * sizeof(char));
-			if (symbolic_name_tmp == NULL) cgp_throw(MEM_ERR, "");
-			snprintf(symbolic_name_tmp, symbolic_name_len, "%s-symbolic.svg", projectId);
-
-			printf("Downloading data/icons/hicolor/symbolic/apps/%s-symbolic.svg...\n\n", projectId);
+			char* symbolic_name_tmp = projectDataToFile("symbolic.svg", projectId, "-");
+			printf("Downloading data/icons/hicolor/symbolic/apps/%s...\n\n", symbolic_name_tmp);
 			downloadFileAndReplace(
 				symbolic_apps_dir_tmp,
 				symbolic_name_tmp,
@@ -488,6 +489,8 @@ int main(int argc, char* argv[]) {
 	} else {
 		cgp_throw(PROGRAM_ERR, NOT_IMPLEMENTED);
 	}
+
+	implantLicenseFile(license, authorName, outputDir);
 
 	finishAndGreet(isExtension, isLibadwaita, doGit, outputDir);
 

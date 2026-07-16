@@ -55,7 +55,7 @@ void mkdir_p(const char* path) {
 		DynStringArray segments = String_split(path, "/");
 		for (unsigned int i = 0; i < segments.length; i++) {
 			char* dir = segments.array[i];
-			
+
 			if (!strcmp(dir, ".")) continue;
 
 			//! Create it and check for errors, this WON'T WORK ON WINDOWS
@@ -96,9 +96,7 @@ char* path_join(char* paths[], size_t length) {
 
 	size_t pathSize = 1;
 	char* outputPath = malloc(pathSize * sizeof(char));
-	if (outputPath == NULL) {
-		cgp_throw(MEM_ERR, "");
-	}
+	if (outputPath == NULL) cgp_throw(MEM_ERR, "");
 	// Empty string
 	outputPath[0] = '\0';
 
@@ -114,7 +112,7 @@ char* path_join(char* paths[], size_t length) {
 		char* tmp = realloc(outputPath, pathSize * sizeof(char));
 		if (tmp == NULL) cgp_throw(MEM_ERR, "");
 		outputPath = tmp;
-		
+
 		strcat(outputPath, paths[i]);
 		// Do not assume that the last segment of the path is a directory
 		if (!isSuffixed && i != (length - 1)) strcat(outputPath, "/");
@@ -171,13 +169,16 @@ char* String_toPascalcase(char* string) {
 
 	for (int i = 0; string[i] != '\0'; i++) {
 		if (islower(string[i])) {
+			// If it's the first character, should be uppercase
 			if (i == 0)
 				charcat(newString, toupper(string[i]));
 			else
 				charcat(newString, string[i]);
 		} else if (isblank(string[i])) {
+			// Spaces mean bringing over the *next* character in uppercase
 			if(isalpha(string[i + 1])) {
 				charcat(newString, toupper(string[i + 1]));
+				// Skip that next character in the next loop
 				i++;
 			}
 		} else {
@@ -206,7 +207,7 @@ bool String_endsWith(char* string, char* suffix) {
 	if (suffixLen > stringLen)
 		return false;
 
-	for (int i = strlen(string) - 1; i > (stringLen - suffixLen - 1); i--) {
+	for (int i = stringLen - 1; i > (stringLen - suffixLen - 1); i--) {
 		if (string[i] != suffix[i - (stringLen - suffixLen)]) {
 			matches = false;
 		}
@@ -324,9 +325,8 @@ DynStringArray String_split(const char* string, char* pattern) {
 					charcat(past_segment, string[j]);
 				}
 			}
-			// Add to our array
 			DynStringArray_push(&dynamicArray, past_segment);
-			
+
 			// Skip the current pattern length for lastIdx so the next time the pattern matches, it will start from the next point after 
 			lastIdx = i + patternLen;
 			// Skip by patternLen - 1 because the loop itself contains i++
@@ -347,9 +347,9 @@ char* String_replaceAllMulti(char* string, char* patterns[], char* replacements[
 	char* result = NULL;
 
 	for (size_t i = 0; i < filterCount; i++) {
-		if (result == NULL) {
+		if (result == NULL)
 			result = String_replaceAll(string, patterns[i], replacements[i]);
-		} else {
+		else {
 			char* tmp = result;
 			result = String_replaceAll(tmp, patterns[i], replacements[i]);
 			free(tmp); tmp = NULL;
@@ -376,7 +376,7 @@ char* Int_toString(int32_t number) {
 
 // JavaScript `Array.prototype.includes()` equivalent
 bool IntArray_includes(int array[], unsigned int length, int item) {
-	for (int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; i++) {
 		if (array[i] == item)
 			return true;
 	}
@@ -386,13 +386,13 @@ bool IntArray_includes(int array[], unsigned int length, int item) {
 // JavaScript `Array.prototype.includes()` equivalent
 bool StringArray_includes(char* array[], unsigned int length, char* item) {
 	for (int i = 0; i < length; i++) {
-		if (strcmp(array[i], item) == 0)
+		if (!strcmp(array[i], item))
 			return true;
 	}
 	return false;
 }
 
-//* 64-bit integer to fit all `unsigned int` values plus negative values for the -1 and avoid overflows
+//* 64-bit integer to fit all `unsigned int` values plus negative values for the -1 to avoid overflows
 // JavaScript `Array.prototype.indexOf()` equivalent
 int64_t IntArray_indexOf(int array[], unsigned int length, int item) {
 	for (int i = 0; i < length; i++) {
@@ -443,9 +443,7 @@ unsigned int DynIntArray_push(DynIntArray* dynamicArray, int item) {
 		unsigned int newLength = 1;
 
 		newArray.array = malloc(1 * sizeof(int));
-		if (newArray.array == NULL) {
-			cgp_throw(MEM_ERR, "");
-		}
+		if (newArray.array == NULL) cgp_throw(MEM_ERR, "");
 		newArray.length = newLength;
 		newArray.array[0] = item;
 
@@ -460,8 +458,7 @@ unsigned int DynIntArray_push(DynIntArray* dynamicArray, int item) {
 	unsigned int newLength = dynamicArray->length + 1;
 
 	int* newPtr = realloc(dynamicArray->array, newLength * sizeof(int));
-	if (newPtr == NULL)
-		cgp_throw(MEM_ERR, "");
+	if (newPtr == NULL) cgp_throw(MEM_ERR, "");
 
 	// Set last element to new item
 	newPtr[dynamicArray->length] = item;
@@ -486,8 +483,7 @@ unsigned int DynIntArray_pop(DynIntArray* dynamicArray) {
 
 	// This frees the last element, basically deleting it
 	int* newPtr = realloc(dynamicArray->array, newLength * sizeof(int));
-	if (newPtr == NULL)
-		cgp_throw(MEM_ERR, "");
+	if (newPtr == NULL) cgp_throw(MEM_ERR, "");
 
 	newArray.array = newPtr;
 	newArray.length = newLength;
@@ -537,8 +533,7 @@ DynStringArray new_DynStringArray(char* array[], unsigned int initialLength) {
 
 	DynStringArray newArray;
 	newArray.array = malloc(initialLength * sizeof(char*));
-	if (newArray.array == NULL)
-		cgp_throw(MEM_ERR, "");
+	if (newArray.array == NULL) cgp_throw(MEM_ERR, "");
 
 	newArray.length = initialLength;
 
@@ -551,6 +546,7 @@ DynStringArray new_DynStringArray(char* array[], unsigned int initialLength) {
 
 //* Push an element to a dynamic string array
 unsigned int DynStringArray_push(DynStringArray* dynamicArray, char* item) {
+	// Copy the new item away so that it isn't in control of the caller but us, the DynStringArray struct, and the _free function
 	size_t newItemLen = strlen(item) + 1;
 	char* newItem = malloc(newItemLen * sizeof(char));
 	if (newItem == NULL) cgp_throw(MEM_ERR, "");
@@ -561,9 +557,7 @@ unsigned int DynStringArray_push(DynStringArray* dynamicArray, char* item) {
 		unsigned int newLength = 1;
 
 		newArray.array = malloc(1 * sizeof(char*));
-		if (newArray.array == NULL) {
-			cgp_throw(MEM_ERR, "");
-		}
+		if (newArray.array == NULL) cgp_throw(MEM_ERR, "");
 		newArray.length = newLength;
 		newArray.array[0] = newItem;
 
@@ -578,8 +572,7 @@ unsigned int DynStringArray_push(DynStringArray* dynamicArray, char* item) {
 	unsigned int newLength = dynamicArray->length + 1;
 
 	char** newPtr = realloc(dynamicArray->array, newLength * sizeof(char*));
-	if (newPtr == NULL)
-		cgp_throw(MEM_ERR, "");
+	if (newPtr == NULL) cgp_throw(MEM_ERR, "");
 
 	// Set last element to new item
 	newPtr[dynamicArray->length] = newItem;
@@ -602,7 +595,11 @@ unsigned int DynStringArray_pop(DynStringArray* dynamicArray) {
 	DynStringArray newArray;
 	unsigned int newLength = dynamicArray->length - 1;
 
-	// Unlike integer arrays, the last element is a malloced string, we must free it
+	/*
+		Unlike integer arrays, the last element is a malloced string, we must free it.
+		newLength is the length of the array - 1, and while for realloc that means we're
+		shrinking the array, using newLength here just means the last element.
+	*/
 	if (dynamicArray->array[newLength] != NULL) {
 		free(dynamicArray->array[newLength]); dynamicArray->array[newLength] = NULL;
 	}
