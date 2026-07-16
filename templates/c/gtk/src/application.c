@@ -38,7 +38,7 @@ static void
 		window = g_object_new ({{NAME_CAPS}}_TYPE_WINDOW,
 							   "application", app,
 							   NULL);
-	
+
 	gtk_window_present(window);
 }
 
