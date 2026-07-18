@@ -14,7 +14,10 @@ const char* CGP_OPTIONS[MAX_OPTIONS][3] = {
 	{"-l", "--lang", "Programming Language. Available options: JavaScript, C. Default: C"},
 	{"-e", "--editor", "Configure editor or IDE to work immediately. Available options: VSCode, Rider, None. Default: None"},
 	{"-li", "--license", "Code License. Available options: GPLv3, MIT. Default: GPLv3"},
-	// Terminal styling courtesy of my own javascript library, https://github.com/Proman4713/javascript-console-styling
+	/*
+		Terminal styling courtesy of my own javascript library, https://github.com/Proman4713/javascript-console-styling, the functionality of which can
+		easily be replicated by reading the Wikipedia page on ANSI escape codes, haha
+	*/
 	{"-g", "--git", "Initiate a git repository in \x1b[1m--output-dir\x1b[0m"},
 };
 

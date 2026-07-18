@@ -96,14 +96,14 @@ void downloadFileAndReplace(
 
 	/*
 		For flatpak manifest, this gets the path of whatever directory is currently being downloaded to,
-		! luckily the flatpak manifest is in outputDir, but I should keep that in mind
+		! luckily the flatpak manifest is in outputDir, but I should keep that in mind in case I use this for a file that isn't.
 	*/
 	char* curDir = getcwd(NULL, 0);
 	chdir(directory);
 	char* PROJECT_PATH = getcwd(NULL, 0);
 	chdir(curDir);
 	free(curDir); curDir = NULL;
-	
+
 	//* License headers
 	char* fallbackLicenseHeader = " * [create-gnome-project]: Unsupported license";
 	size_t license_header_len_tmp = strlen(fallbackLicenseHeader) + 1;

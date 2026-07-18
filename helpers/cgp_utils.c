@@ -85,7 +85,7 @@ void mkdir_p(const char* path) {
 			chdir(dir);
 		}
 		chdir(curDir);
-		free(curDir);
+		free(curDir); curDir = NULL;
 		DynStringArray_free(&segments);
 	}
 }
@@ -538,7 +538,13 @@ DynStringArray new_DynStringArray(char* array[], unsigned int initialLength) {
 	newArray.length = initialLength;
 
 	for (int i = 0; i < initialLength; i++) {
-		newArray.array[i] = array[i];
+		// Copy the new item away so that it isn't in control of the caller but us, the DynStringArray struct, and the _free function
+		size_t newItemLen = strlen(array[i]) + 1;
+		char* newItem = malloc(newItemLen * sizeof(char));
+		if (newItem == NULL) cgp_throw(MEM_ERR, "");
+		strncpy(newItem, array[i], newItemLen);
+
+		newArray.array[i] = newItem;
 	}
 
 	return newArray;
